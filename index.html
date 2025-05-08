@@ -1,0 +1,3088 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎁 Симулятор кейсов с фигурками 🎁</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffcc00;
+            --secondary-color: #ff6b00;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #121212;
+            --item-bg: #333;
+            --success-color: #33cc33;
+            --danger-color: #ff3333;
+            --rare-color: #4d88ff;
+            --epic-color: #b347ea;
+            --legendary-color: #ffaa00;
+            --mythic-color: #ff3366;
+            --special-color: #33cc99;
+            --battle-color: #ff4d4d;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% 50%, #2a2a2a 0%, #1a1a1a 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding: 10px 0;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            cursor: pointer;
+            background-color: #333;
+            border: none;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            transition: all 0.3s;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: var(--primary-color);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+        
+        .tab.active {
+            background-color: #444;
+            color: var(--primary-color);
+        }
+        
+        .tab.active::after {
+            width: 100%;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #444;
+            color: var(--primary-color);
+        }
+        
+        .tab-badge {
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .balance {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .balance-item {
+            display: flex;
+            align-items: center;
+            background-color: #444;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .balance-icon {
+            font-size: 1.2rem;
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        .cases-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .case {
+            background: linear-gradient(145deg, #3a3a3a, #2e2e2e);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid #444;
+        }
+        
+        .case:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+        
+        .case::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0) 30%,
+                rgba(255, 255, 255, 0.1) 45%,
+                rgba(255, 255, 255, 0) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s;
+        }
+        
+        .case:hover::before {
+            left: 100%;
+            top: 100%;
+        }
+        
+        .case-img-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #222;
+            font-size: 80px;
+        }
+        
+        .case img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .case:hover img {
+            transform: scale(1.05);
+        }
+        
+        .case h3 {
+            margin: 10px 0 5px;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .case .price {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .case .price .key-icon {
+            margin-right: 5px;
+        }
+        
+        .case .limited {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--danger-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .rarity {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .common { background-color: #aaa; color: #333; }
+        .rare { background-color: var(--rare-color); color: white; }
+        .epic { background-color: var(--epic-color); color: white; }
+        .legendary { background-color: var(--legendary-color); color: #333; }
+        .mythic { background-color: var(--mythic-color); color: white; }
+        .special { background-color: var(--special-color); color: white; }
+        
+        .animation-container {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+            margin: 30px 0;
+            background-color: #222;
+            border-radius: 10px;
+            display: none;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .animation-items {
+            display: flex;
+            position: absolute;
+            left: 0;
+            transition: left 0.1s;
+            height: 100%;
+        }
+        
+        .animation-item {
+            width: 180px;
+            height: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #333;
+            margin-right: 5px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #444;
+            font-size: 80px;
+        }
+        
+        .animation-item.highlight {
+            animation: highlight 0.5s infinite alternate;
+        }
+        
+        @keyframes highlight {
+            from { border-color: #444; box-shadow: none; }
+            to { border-color: var(--primary-color); box-shadow: 0 0 20px var(--primary-color); }
+        }
+        
+        .animation-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .animation-item .name {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            padding: 0 5px;
+        }
+        
+        .result {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 28px;
+            color: var(--primary-color);
+            display: none;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0) 30%,
+                rgba(255, 255, 255, 0.2) 45%,
+                rgba(255, 255, 255, 0) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.5s;
+        }
+        
+        button:hover::after {
+            left: 100%;
+            top: 100%;
+        }
+        
+        .sell-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .sell-btn:hover {
+            background-color: #e60000;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+        }
+        
+        .keep-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .keep-btn:hover {
+            background-color: #29a329;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(51, 204, 51, 0.4);
+        }
+        
+        .inventory-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+        }
+        
+        .inventory-item {
+            background: linear-gradient(145deg, #3a3a3a, #2e2e2e);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            border: 2px solid #444;
+        }
+        
+        .inventory-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .inventory-item-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 2px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin: 0 auto 10px;
+            background-color: #222;
+        }
+        
+        .inventory-item .name {
+            font-size: 14px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+        
+        .inventory-item .price {
+            color: var(--primary-color);
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .inventory-item .level {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--primary-color);
+            color: #333;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .item-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        
+        .sell-inventory-btn {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            flex: 1;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sell-inventory-btn:hover {
+            background-color: #e60000;
+        }
+        
+        .upgrade-inventory-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s;
+        }
+        
+        .upgrade-inventory-btn:hover {
+            background-color: #e05d00;
+        }
+        
+        .upgrade-inventory-btn.selected {
+            background-color: var(--primary-color);
+            color: #333;
+        }
+        
+        .upgrade-container {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .upgrade-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #444;
+            border-radius: 8px;
+        }
+        
+        .upgrade-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #444;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .upgrade-item:hover {
+            background-color: #555;
+        }
+        
+        .upgrade-item-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin-right: 15px;
+            border: 2px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            background-color: #333;
+        }
+        
+        .upgrade-item-info {
+            flex: 1;
+        }
+        
+        .upgrade-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .upgrade-item-stats {
+            display: flex;
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .upgrade-item-price {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .upgrade-item-chance {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .upgrade-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .upgrade-btn:hover {
+            background-color: #e05d00;
+            transform: translateY(-2px);
+        }
+        
+        .upgrade-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            opacity: 0;
+            animation: confetti-fall 5s linear forwards;
+            z-index: 1000;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            animation: modalAppear 0.5s;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes modalAppear {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .modal-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .modal-text {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+        
+        .modal-item {
+            margin: 20px 0;
+            font-size: 60px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #444;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .quests-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .quest {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .quest:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .quest-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .quest-description {
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .quest-reward {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .quest-reward-icon {
+            margin-right: 5px;
+        }
+        
+        .quest-progress {
+            width: 100%;
+            height: 8px;
+            background-color: #444;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .quest-progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary-color), var(--primary-color));
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .quest-complete-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .quest-complete-btn:hover {
+            background-color: #29a329;
+        }
+        
+        .quest-complete-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .daily-bonus {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px dashed var(--primary-color);
+        }
+        
+        .daily-bonus-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .daily-bonus-btn {
+            background-color: var(--primary-color);
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+        }
+        
+        .daily-bonus-btn:hover {
+            background-color: #ffd633;
+            transform: scale(1.05);
+        }
+        
+        .daily-bonus-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Стили для просмотра кейса */
+        .case-preview {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .case-preview-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .case-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .case-item {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .case-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .case-item-emoji {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .case-item-name {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .case-item-price {
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .open-case-options {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .open-case-count {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .open-case-count input {
+            width: 50px;
+            padding: 5px;
+            text-align: center;
+            border-radius: 5px;
+            border: none;
+            background-color: #444;
+            color: white;
+        }
+        
+        .open-case-speed {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .speed-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #444;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .speed-btn.active {
+            background-color: var(--primary-color);
+            color: #333;
+        }
+        
+        .open-case-btn {
+            padding: 10px 20px;
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .open-case-btn:hover {
+            background-color: #29a329;
+            transform: translateY(-2px);
+        }
+        
+        /* Стили для профиля */
+        .profile-container {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            border: 3px solid var(--primary-color);
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .profile-level {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .profile-level-number {
+            background-color: var(--primary-color);
+            color: #333;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .stat-title {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        /* Стили для Case Battle */
+        .battle-container {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .battle-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--battle-color);
+            text-align: center;
+        }
+        
+        .battle-description {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .battle-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .battle-option {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #555;
+        }
+        
+        .battle-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-color: var(--battle-color);
+        }
+        
+        .battle-option.selected {
+            border-color: var(--battle-color);
+            background-color: #555;
+        }
+        
+        .battle-option h3 {
+            margin-bottom: 10px;
+            color: var(--battle-color);
+        }
+        
+        .battle-option .price {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .battle-option .participants {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        .battle-start-btn {
+            background-color: var(--battle-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: block;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+        
+        .battle-start-btn:hover {
+            background-color: #ff3333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
+        }
+        
+        .battle-start-btn:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .battle-results {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .battle-participants {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .battle-participant {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            transition: all 0.3s;
+        }
+        
+        .battle-participant.winner {
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .battle-participant-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 10px;
+            border: 2px solid #666;
+        }
+        
+        .battle-participant-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .battle-participant-item {
+            font-size: 30px;
+            margin: 10px 0;
+        }
+        
+        .battle-participant-value {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .battle-reward {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            display: none;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .cases-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .inventory-items {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            
+            .animation-item {
+                width: 150px;
+            }
+            
+            .animation-item img {
+                width: 100px;
+                height: 100px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .quests-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .case-items {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .battle-options {
+                flex-direction: column;
+            }
+            
+            .battle-participants {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Симулятор кейсов с фигурками 🎁</h1>
+        
+        <div class="balance">
+            <div class="balance-item">
+                <span class="balance-icon">💰</span>
+                Баланс: <span id="money">1000</span> ₽
+            </div>
+            <div class="balance-item">
+                <span class="balance-icon">🎁</span>
+                Открыто: <span id="opened-cases">0</span>
+            </div>
+            <div class="balance-item">
+                <span class="balance-icon">🔑</span>
+                Ключи: <span id="keys">0</span>
+            </div>
+            <div class="balance-item">
+                <span class="balance-icon">⭐</span>
+                Опыт: <span id="xp">0</span>/<span id="next-level-xp">100</span>
+            </div>
+            <div class="balance-item">
+                <span class="balance-icon">🏆</span>
+                Уровень: <span id="level">1</span>
+            </div>
+            <div class="balance-item">
+                <span class="balance-icon">⚔️</span>
+                Рейтинг: <span id="rating">1000</span>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="openTab('cases-tab')">Кейсы</button>
+            <button class="tab" onclick="openTab('battle-tab')">Case Battle</button>
+            <button class="tab" onclick="openTab('inventory-tab')">Инвентарь</button>
+            <button class="tab" onclick="openTab('upgrade-tab')">Апгрейд</button>
+            <button class="tab" onclick="openTab('quests-tab')">
+                Задания
+                <span id="quests-badge" class="tab-badge" style="display: none;">0</span>
+            </button>
+            <button class="tab" onclick="openTab('profile-tab')">Профиль</button>
+        </div>
+        
+        <div id="cases-tab" class="tab-content active">
+            <div class="daily-bonus">
+                <div class="daily-bonus-title">Ежедневный бонус</div>
+                <p>Вернитесь завтра, чтобы получить награду!</p>
+                <button id="daily-bonus-btn" class="daily-bonus-btn" disabled>Получить через 00:00:00</button>
+            </div>
+            
+            <h2>Доступные кейсы</h2>
+            <div class="cases-container">
+                <div class="case" onclick="showCasePreview(0)">
+                    <div class="case-img-container">📦</div>
+                    <h3>Обычный кейс</h3>
+                    <div class="price">100 ₽</div>
+                    <div class="rarity common">Обычный</div>
+                </div>
+                
+                <div class="case" onclick="showCasePreview(1)">
+                    <div class="case-img-container">🎁</div>
+                    <h3>Редкий кейс</h3>
+                    <div class="price">300 ₽</div>
+                    <div class="rarity rare">Редкий</div>
+                </div>
+                
+                <div class="case" onclick="showCasePreview(2)">
+                    <div class="case-img-container">💎</div>
+                    <h3>Эпический кейс</h3>
+                    <div class="price">500 ₽</div>
+                    <div class="rarity epic">Эпический</div>
+                    <div class="limited">Осталось: <span id="limited-count">5</span></div>
+                </div>
+                
+                <div class="case" onclick="showCasePreview(3)">
+                    <div class="case-img-container">🏆</div>
+                    <h3>Легендарный кейс</h3>
+                    <div class="price">1000 ₽</div>
+                    <div class="rarity legendary">Легендарный</div>
+                    <div class="limited">Осталось: <span id="legendary-count">3</span></div>
+                </div>
+                
+                <div class="case" onclick="showCasePreview(4)">
+                    <div class="case-img-container">👑</div>
+                    <h3>Мифический кейс</h3>
+                    <div class="price"><span class="key-icon">🔑</span> 1</div>
+                    <div class="rarity mythic">Мифический</div>
+                    <div class="limited">Осталось: <span id="mythic-count">2</span></div>
+                </div>
+                
+                <div class="case" onclick="showCasePreview(5)">
+                    <div class="case-img-container">🎲</div>
+                    <h3>Случайный кейс</h3>
+                    <div class="price">200 ₽</div>
+                    <div class="rarity special">Особый</div>
+                </div>
+            </div>
+            
+            <div id="case-preview-container" class="case-preview" style="display: none;">
+                <h3 class="case-preview-title" id="case-preview-title">Просмотр кейса</h3>
+                <div class="case-items" id="case-items-preview">
+                    <!-- Здесь будут предметы из кейса -->
+                </div>
+                <div class="open-case-options">
+                    <div class="open-case-count">
+                        <span>Количество:</span>
+                        <input type="number" id="case-count" min="1" max="10" value="1">
+                    </div>
+                    <div class="open-case-speed">
+                        <span>Скорость:</span>
+                        <button class="speed-btn active" onclick="setOpenSpeed('fast')">Быстрая</button>
+                        <button class="speed-btn" onclick="setOpenSpeed('slow')">Медленная</button>
+                    </div>
+                    <button class="open-case-btn" id="open-case-btn" onclick="openSelectedCase()">Открыть</button>
+                </div>
+            </div>
+            
+            <div class="animation-container" id="animation-container">
+                <div class="animation-items" id="animation-items"></div>
+            </div>
+            
+            <div class="result" id="result"></div>
+            
+            <div class="buttons" id="buttons">
+                <button class="sell-btn" onclick="sellItem()">Продать</button>
+                <button class="keep-btn" onclick="keepItem()">Оставить</button>
+            </div>
+        </div>
+        
+        <div id="battle-tab" class="tab-content">
+            <div class="battle-container">
+                <h2 class="battle-title">⚔️ Case Battle ⚔️</h2>
+                <p class="battle-description">Соревнуйтесь с другими игроками! Открывайте кейсы и побеждайте, если ваша фигурка окажется самой ценной.</p>
+                
+                <div class="battle-options">
+                    <div class="battle-option" onclick="selectBattleOption(0)">
+                        <h3>Обычный баттл</h3>
+                        <div class="price">100 ₽</div>
+                        <div class="participants">2-4 участника</div>
+                    </div>
+                    <div class="battle-option" onclick="selectBattleOption(1)">
+                        <h3>Редкий баттл</h3>
+                        <div class="price">300 ₽</div>
+                        <div class="participants">3-5 участников</div>
+                    </div>
+                    <div class="battle-option" onclick="selectBattleOption(2)">
+                        <h3>Эпический баттл</h3>
+                        <div class="price">500 ₽</div>
+                        <div class="participants">4-6 участников</div>
+                    </div>
+                    <div class="battle-option" onclick="selectBattleOption(3)">
+                        <h3>Легендарный баттл</h3>
+                        <div class="price">1000 ₽</div>
+                        <div class="participants">5-8 участников</div>
+                    </div>
+                </div>
+                
+                <button id="battle-start-btn" class="battle-start-btn" disabled onclick="startBattle()">Выберите тип баттла</button>
+                
+                <div id="battle-results" class="battle-results">
+                    <div id="battle-participants" class="battle-participants">
+                        <!-- Здесь будут участники баттла -->
+                    </div>
+                    
+                    <div id="battle-reward" class="battle-reward">
+                        <!-- Здесь будет награда за победу -->
+                    </div>
+                    
+                    <button class="battle-start-btn" onclick="resetBattle()">Новый баттл</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="inventory-tab" class="tab-content">
+            <h2>Ваш инвентарь</h2>
+            <p id="empty-inventory" style="text-align: center; color: #aaa; display: none;">Ваш инвентарь пуст. Откройте кейсы, чтобы получить фигурки!</p>
+            <div class="inventory-items" id="inventory-items">
+                <!-- Здесь будут отображаться полученные фигурки -->
+            </div>
+        </div>
+        
+        <div id="upgrade-tab" class="tab-content">
+            <h2>Улучшение фигурок</h2>
+            <div class="upgrade-container">
+                <div class="upgrade-info">
+                    <h3>Как это работает?</h3>
+                    <p>Выберите две фигурки одного уровня для попытки улучшения. При успехе вы получите фигурку следующего уровня, при неудаче - потеряете оба предмета.</p>
+                    <div class="progress-bar">
+                        <div class="progress" id="upgrade-progress">0%</div>
+                    </div>
+                    <p>Шанс успеха: <span id="upgrade-chance">0</span>%</p>
+                </div>
+                
+                <h3>Выберите фигурки для улучшения:</h3>
+                <div id="upgrade-items">
+                    <!-- Здесь будут фигурки для улучшения -->
+                </div>
+                
+                <button id="perform-upgrade" class="upgrade-btn" disabled onclick="performUpgrade()">Улучшить</button>
+            </div>
+        </div>
+        
+        <div id="quests-tab" class="tab-content">
+            <h2>Задания</h2>
+            <p>Выполняйте задания, чтобы получать награды и опыт!</p>
+            
+            <div class="quests-container" id="quests-container">
+                <!-- Здесь будут задания -->
+            </div>
+        </div>
+        
+        <div id="profile-tab" class="tab-content">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar">👤</div>
+                    <div class="profile-info">
+                        <div class="profile-name">Игрок</div>
+                        <div class="profile-level">
+                            <div class="profile-level-number" id="profile-level">1</div>
+                            <div>Уровень</div>
+                        </div>
+                        <div class="progress-bar" style="height: 10px;">
+                            <div class="progress" id="profile-level-progress" style="height: 100%; width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Статистика</h3>
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-title">Всего открыто кейсов</div>
+                        <div class="stat-value" id="stat-cases-opened">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Всего получено фигурок</div>
+                        <div class="stat-value" id="stat-items-received">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Всего продано на</div>
+                        <div class="stat-value" id="stat-money-earned">0 ₽</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Максимальный уровень фигурки</div>
+                        <div class="stat-value" id="stat-max-level">1</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Легендарных фигурок</div>
+                        <div class="stat-value" id="stat-legendary-items">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Выполнено заданий</div>
+                        <div class="stat-value" id="stat-quests-completed">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Победы в баттлах</div>
+                        <div class="stat-value" id="stat-battle-wins">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Рейтинг</div>
+                        <div class="stat-value" id="stat-rating">1000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="upgrade-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title" id="upgrade-modal-title">Результат улучшения</h2>
+            <p class="modal-text" id="upgrade-modal-text"></p>
+            <div class="modal-item" id="upgrade-modal-item"></div>
+            <button class="upgrade-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+    
+    <div id="key-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title">🎉 Поздравляем! 🎉</h2>
+            <p class="modal-text">Вы получили ключ от кейса!</p>
+            <p>Теперь вы можете открыть один кейс бесплатно.</p>
+            <div class="modal-item">🔑</div>
+            <button class="upgrade-btn" onclick="closeModal()">Отлично!</button>
+        </div>
+    </div>
+    
+    <div id="daily-bonus-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title">🎁 Ежедневный бонус 🎁</h2>
+            <p class="modal-text" id="daily-bonus-modal-text">Вы получили ежедневный бонус!</p>
+            <div class="modal-item" id="daily-bonus-modal-item">💰</div>
+            <button class="upgrade-btn" onclick="closeModal()">Спасибо!</button>
+        </div>
+    </div>
+    
+    <div id="quest-complete-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title">🏆 Задание выполнено! 🏆</h2>
+            <p class="modal-text" id="quest-complete-modal-text"></p>
+            <div class="modal-item" id="quest-complete-modal-item">🎁</div>
+            <button class="upgrade-btn" onclick="closeModal()">Отлично!</button>
+        </div>
+    </div>
+    
+    <div id="level-up-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title">⭐ Уровень повышен! ⭐</h2>
+            <p class="modal-text" id="level-up-modal-text">Поздравляем! Вы достигли нового уровня!</p>
+            <div class="modal-item">🏆</div>
+            <button class="upgrade-btn" onclick="closeModal()">Ура!</button>
+        </div>
+    </div>
+    
+    <div id="battle-win-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 class="modal-title">🏆 Победа в баттле! 🏆</h2>
+            <p class="modal-text" id="battle-win-modal-text"></p>
+            <div class="modal-item" id="battle-win-modal-item">⚔️</div>
+            <button class="upgrade-btn" onclick="closeModal()">Отлично!</button>
+        </div>
+    </div>
+
+    <script>
+        // Данные о фигурках для каждого кейса
+        const caseItems = [
+            // Обычный кейс (0)
+            [
+                { name: "Обычная фигурка 1", price: 50, emoji: "🐭", rarity: "common", level: 1, id: 1 },
+                { name: "Обычная фигурка 2", price: 70, emoji: "🐹", rarity: "common", level: 1, id: 2 },
+                { name: "Редкая фигурка 1", price: 150, emoji: "🐰", rarity: "rare", level: 1, id: 3 },
+                { name: "Редкая фигурка 2", price: 200, emoji: "🦊", rarity: "rare", level: 1, id: 4 },
+                { name: "Легендарная фигурка", price: 500, emoji: "🐲", rarity: "legendary", level: 1, id: 5 }
+            ],
+            // Редкий кейс (1)
+            [
+                { name: "Редкая фигурка A", price: 200, emoji: "🐻", rarity: "rare", level: 1, id: 6 },
+                { name: "Редкая фигурка B", price: 250, emoji: "🐼", rarity: "rare", level: 1, id: 7 },
+                { name: "Эпическая фигурка X", price: 400, emoji: "🦄", rarity: "epic", level: 1, id: 8 },
+                { name: "Легендарная фигурка Y", price: 800, emoji: "🐉", rarity: "legendary", level: 1, id: 9 }
+            ],
+            // Эпический кейс (2)
+            [
+                { name: "Эпическая фигурка 1", price: 400, emoji: "🦁", rarity: "epic", level: 1, id: 10 },
+                { name: "Эпическая фигурка 2", price: 600, emoji: "🐯", rarity: "epic", level: 1, id: 11 },
+                { name: "Легендарная фигурка Z", price: 1000, emoji: "🦅", rarity: "legendary", level: 1, id: 12 },
+                { name: "Золотая фигурка", price: 2000, emoji: "🌟", rarity: "legendary", level: 1, id: 13 }
+            ],
+            // Легендарный кейс (3)
+            [
+                { name: "Легендарная фигурка Alpha", price: 1000, emoji: "👑", rarity: "legendary", level: 1, id: 14 },
+                { name: "Легендарная фигурка Beta", price: 1200, emoji: "🦸", rarity: "legendary", level: 1, id: 15 },
+                { name: "Мифическая фигурка", price: 3000, emoji: "🧙", rarity: "mythic", level: 1, id: 16 },
+                { name: "Ключ от кейса", price: 0, emoji: "🔑", rarity: "special", level: 0, id: 17, isKey: true }
+            ],
+            // Мифический кейс (4)
+            [
+                { name: "Мифическая фигурка 1", price: 1500, emoji: "🧚", rarity: "mythic", level: 1, id: 18 },
+                { name: "Мифическая фигурка 2", price: 2000, emoji: "🧜", rarity: "mythic", level: 1, id: 19 },
+                { name: "Уникальная фигурка", price: 5000, emoji: "🦚", rarity: "mythic", level: 1, id: 20 },
+                { name: "Божественная фигурка", price: 10000, emoji: "👼", rarity: "mythic", level: 1, id: 21 }
+            ],
+            // Случайный кейс (5)
+            [
+                { name: "Обычная фигурка", price: 50, emoji: "🐶", rarity: "common", level: 1, id: 22 },
+                { name: "Редкая фигурка", price: 200, emoji: "🐱", rarity: "rare", level: 1, id: 23 },
+                { name: "Эпическая фигурка", price: 500, emoji: "🦁", rarity: "epic", level: 1, id: 24 },
+                { name: "Легендарная фигурка", price: 1000, emoji: "🦄", rarity: "legendary", level: 1, id: 25 },
+                { name: "Мифическая фигурка", price: 2000, emoji: "🐲", rarity: "mythic", level: 1, id: 26 }
+            ]
+        ];
+        
+        // Цены кейсов
+        const casePrices = [100, 300, 500, 1000, 0, 200];
+        
+        // Ограниченное количество кейсов
+        let limitedCasesLeft = 5;
+        let legendaryCasesLeft = 3;
+        let mythicCasesLeft = 2;
+        
+        // Игровые переменные
+        let money = 1000;
+        let openedCases = 0;
+        let keys = 0;
+        let xp = 0;
+        let level = 1;
+        let nextLevelXp = 100;
+        let rating = 1000;
+        let inventory = [];
+        let currentItem = null;
+        let animationInterval = null;
+        let animationSpeed = 30;
+        let slowingDown = false;
+        let currentPosition = 0;
+        let targetPosition = 0;
+        let selectedForUpgrade = [];
+        let quests = [];
+        let completedQuests = [];
+        let lastDailyBonusDate = null;
+        let dailyBonusAvailable = false;
+        let selectedCaseIndex = -1;
+        let openSpeed = 'fast'; // 'fast' или 'slow'
+        let openCount = 1;
+        let stats = {
+            totalCasesOpened: 0,
+            totalItemsReceived: 0,
+            totalMoneyEarned: 0,
+            maxItemLevel: 1,
+            legendaryItems: 0,
+            questsCompleted: 0,
+            battleWins: 0
+        };
+        
+        // Переменные для Case Battle
+        let selectedBattleOption = -1;
+        let battleParticipants = [];
+        let battleResults = [];
+        let battleInProgress = false;
+        
+        // Квесты
+        const allQuests = [
+            {
+                id: 1,
+                title: "Новичок",
+                description: "Откройте 5 кейсов",
+                target: 5,
+                current: 0,
+                reward: { money: 500, xp: 50 },
+                type: "open_cases"
+            },
+            {
+                id: 2,
+                title: "Коллекционер",
+                description: "Соберите 10 фигурок в инвентарь",
+                target: 10,
+                current: 0,
+                reward: { money: 1000, xp: 100 },
+                type: "collect_items"
+            },
+            {
+                id: 3,
+                title: "Торговец",
+                description: "Продайте фигурок на 2000 ₽",
+                target: 2000,
+                current: 0,
+                reward: { money: 1000, xp: 150 },
+                type: "sell_items"
+            },
+            {
+                id: 4,
+                title: "Улучшатель",
+                description: "Улучшите 3 фигурки",
+                target: 3,
+                current: 0,
+                reward: { money: 1500, xp: 200 },
+                type: "upgrade_items"
+            },
+            {
+                id: 5,
+                title: "Эксперт",
+                description: "Откройте 3 редких кейса",
+                target: 3,
+                current: 0,
+                reward: { money: 2000, xp: 300, keys: 1 },
+                type: "open_rare_cases"
+            },
+            {
+                id: 6,
+                title: "Легенда",
+                description: "Получите легендарную фигурку",
+                target: 1,
+                current: 0,
+                reward: { money: 3000, xp: 500, keys: 2 },
+                type: "get_legendary"
+            },
+            {
+                id: 7,
+                title: "Боец",
+                description: "Победите в 3 баттлах",
+                target: 3,
+                current: 0,
+                reward: { money: 2500, xp: 400, keys: 1 },
+                type: "win_battles"
+            }
+        ];
+        
+        // Имена для ботов в Case Battle
+        const botNames = [
+            "ProGamer", "CaseMaster", "LuckyDude", "RichBoy", "KingOfCases",
+            "SilverFox", "GoldenHand", "MrWinner", "BossOfThis", "CaseDestroyer",
+            "UnluckyGuy", "NoobPlayer", "RandomDude", "JustTrying", "HopeToWin"
+        ];
+        
+        // Инициализация игры
+        function initGame() {
+            loadGame();
+            generateQuests();
+            checkDailyBonus();
+            updateBalance();
+            updateInventory();
+            updateQuests();
+            startDailyBonusTimer();
+            updateProfileStats();
+        }
+        
+        // Сохранение игры
+        function saveGame() {
+            const gameData = {
+                money,
+                openedCases,
+                keys,
+                xp,
+                level,
+                nextLevelXp,
+                rating,
+                inventory,
+                limitedCasesLeft,
+                legendaryCasesLeft,
+                mythicCasesLeft,
+                quests,
+                completedQuests,
+                lastDailyBonusDate,
+                dailyBonusAvailable,
+                stats
+            };
+            
+            localStorage.setItem('caseSimulatorSave', JSON.stringify(gameData));
+        }
+        
+        // Загрузка игры
+        function loadGame() {
+            const savedData = localStorage.getItem('caseSimulatorSave');
+            
+            if (savedData) {
+                const gameData = JSON.parse(savedData);
+                
+                money = gameData.money || 1000;
+                openedCases = gameData.openedCases || 0;
+                keys = gameData.keys || 0;
+                xp = gameData.xp || 0;
+                level = gameData.level || 1;
+                nextLevelXp = gameData.nextLevelXp || 100;
+                rating = gameData.rating || 1000;
+                inventory = gameData.inventory || [];
+                limitedCasesLeft = gameData.limitedCasesLeft || 5;
+                legendaryCasesLeft = gameData.legendaryCasesLeft || 3;
+                mythicCasesLeft = gameData.mythicCasesLeft || 2;
+                quests = gameData.quests || [];
+                completedQuests = gameData.completedQuests || [];
+                lastDailyBonusDate = gameData.lastDailyBonusDate ? new Date(gameData.lastDailyBonusDate) : null;
+                dailyBonusAvailable = gameData.dailyBonusAvailable || false;
+                stats = gameData.stats || {
+                    totalCasesOpened: 0,
+                    totalItemsReceived: 0,
+                    totalMoneyEarned: 0,
+                    maxItemLevel: 1,
+                    legendaryItems: 0,
+                    questsCompleted: 0,
+                    battleWins: 0
+                };
+            }
+        }
+        
+        // Обновление отображения баланса
+        function updateBalance() {
+            document.getElementById('money').textContent = money;
+            document.getElementById('opened-cases').textContent = openedCases;
+            document.getElementById('limited-count').textContent = limitedCasesLeft;
+            document.getElementById('legendary-count').textContent = legendaryCasesLeft;
+            document.getElementById('mythic-count').textContent = mythicCasesLeft;
+            document.getElementById('keys').textContent = keys;
+            document.getElementById('xp').textContent = xp;
+            document.getElementById('next-level-xp').textContent = nextLevelXp;
+            document.getElementById('level').textContent = level;
+            document.getElementById('rating').textContent = rating;
+            
+            saveGame();
+        }
+        
+        // Переключение вкладок
+        function openTab(tabId) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Убрать активный класс у всех кнопок вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Показать выбранную вкладку
+            document.getElementById(tabId).classList.add('active');
+            
+            // Сделать кнопку активной
+            event.currentTarget.classList.add('active');
+            
+            // Если открываем вкладку улучшения, обновляем ее
+            if (tabId === 'upgrade-tab') {
+                updateUpgradeTab();
+            }
+            
+            // Если открываем профиль, обновляем статистику
+            if (tabId === 'profile-tab') {
+                updateProfileStats();
+            }
+        }
+        
+        // Показать просмотр кейса
+        function showCasePreview(caseIndex) {
+            selectedCaseIndex = caseIndex;
+            const casePreview = document.getElementById('case-preview-container');
+            const caseTitle = document.getElementById('case-preview-title');
+            const caseItemsPreview = document.getElementById('case-items-preview');
+            
+            // Устанавливаем название кейса
+            let caseName = '';
+            switch(caseIndex) {
+                case 0: caseName = 'Обычный кейс'; break;
+                case 1: caseName = 'Редкий кейс'; break;
+                case 2: caseName = 'Эпический кейс'; break;
+                case 3: caseName = 'Легендарный кейс'; break;
+                case 4: caseName = 'Мифический кейс'; break;
+                case 5: caseName = 'Случайный кейс'; break;
+            }
+            caseTitle.textContent = `Просмотр кейса: ${caseName}`;
+            
+            // Очищаем предыдущие предметы
+            caseItemsPreview.innerHTML = '';
+            
+            // Добавляем предметы из кейса
+            const items = caseItems[caseIndex];
+            items.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'case-item';
+                itemElement.innerHTML = `
+                    <div class="case-item-emoji">${item.emoji}</div>
+                    <div class="case-item-name">${item.name}</div>
+                    <div class="case-item-price">${item.price} ₽</div>
+                    <div class="rarity ${item.rarity}">${getRarityName(item.rarity)}</div>
+                `;
+                caseItemsPreview.appendChild(itemElement);
+            });
+            
+            // Показываем контейнер просмотра
+            casePreview.style.display = 'block';
+            
+            // Прокручиваем к началу
+            casePreview.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Установить скорость открытия кейсов
+        function setOpenSpeed(speed) {
+            openSpeed = speed;
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // Открыть выбранный кейс
+        function openSelectedCase() {
+            const countInput = document.getElementById('case-count');
+            let count = parseInt(countInput.value);
+            
+            // Проверяем корректность ввода
+            if (isNaN(count) || count < 1) {
+                count = 1;
+                countInput.value = 1;
+            } else if (count > 10) {
+                count = 10;
+                countInput.value = 10;
+            }
+            
+            openCount = count;
+            openCase(selectedCaseIndex);
+        }
+        
+        // Открытие кейса
+        function openCase(caseIndex) {
+            // Проверка баланса и ключей
+            if (caseIndex === 4) { // Мифический кейс требует ключ
+                if (keys < openCount) {
+                    alert(`Недостаточно ключей! Нужно ${openCount}, а у вас ${keys}`);
+                    return;
+                }
+            } else {
+                const totalCost = casePrices[caseIndex] * openCount;
+                if (money < totalCost && keys === 0) {
+                    alert(`Недостаточно средств! Нужно ${totalCost} ₽`);
+                    return;
+                }
+            }
+            
+            // Проверка ограниченных кейсов
+            if (caseIndex === 2 && limitedCasesLeft < openCount) {
+                alert(`Недостаточно эпических кейсов! Осталось только ${limitedCasesLeft}`);
+                return;
+            }
+            
+            if (caseIndex === 3 && legendaryCasesLeft < openCount) {
+                alert(`Недостаточно легендарных кейсов! Осталось только ${legendaryCasesLeft}`);
+                return;
+            }
+            
+            if (caseIndex === 4 && mythicCasesLeft < openCount) {
+                alert(`Недостаточно мифических кейсов! Осталось только ${mythicCasesLeft}`);
+                return;
+            }
+            
+            // Используем ключи если это мифический кейс, иначе списываем деньги
+            if (caseIndex === 4) {
+                keys -= openCount;
+            } else if (keys > 0 && confirm(`Использовать ${openCount} ключей вместо денег?`)) {
+                keys -= openCount;
+            } else {
+                money -= casePrices[caseIndex] * openCount;
+            }
+            
+            openedCases += openCount;
+            stats.totalCasesOpened += openCount;
+            
+            if (caseIndex === 2) limitedCasesLeft -= openCount;
+            if (caseIndex === 3) legendaryCasesLeft -= openCount;
+            if (caseIndex === 4) mythicCasesLeft -= openCount;
+            
+            // Добавляем опыт за открытие кейса
+            addXp(10 * (caseIndex + 1) * openCount);
+            
+            // Обновляем квесты
+            updateQuestProgress('open_cases', openCount);
+            if (caseIndex === 1 || caseIndex === 2 || caseIndex === 3) {
+                updateQuestProgress('open_rare_cases', openCount);
+            }
+            
+            updateBalance();
+            
+            // Заблокируем кнопки кейсов на время анимации
+            document.querySelectorAll('.case').forEach(c => c.style.pointerEvents = 'none');
+            
+            // Подготовка анимации
+            prepareAnimation(caseIndex);
+            
+            // Запуск анимации
+            startAnimation(caseIndex);
+        }
+        
+        // Подготовка анимации
+        function prepareAnimation(caseIndex) {
+            const animationContainer = document.getElementById('animation-container');
+            const animationItems = document.getElementById('animation-items');
+            
+            // Очистим предыдущие элементы
+            animationItems.innerHTML = '';
+            
+            // Создадим много копий фигурок для анимации прокрутки
+            const items = caseItems[caseIndex];
+            for (let i = 0; i < 150; i++) {
+                const item = items[Math.floor(Math.random() * items.length)];
+                const itemElement = document.createElement('div');
+                itemElement.className = 'animation-item';
+                itemElement.innerHTML = `
+                    <div style="font-size: 80px;">${item.emoji}</div>
+                    <div class="name">${item.name}</div>
+                `;
+                animationItems.appendChild(itemElement);
+            }
+            
+            // Покажем контейнер анимации
+            animationContainer.style.display = 'block';
+            
+            // Скрываем предыдущий результат и кнопки
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('buttons').style.display = 'none';
+        }
+        
+        // Запуск анимации
+        function startAnimation(caseIndex) {
+            const animationItems = document.getElementById('animation-items');
+            const items = caseItems[caseIndex];
+            
+            // Вычисляем целевую позицию для остановки (случайный элемент с учетом редкости)
+            let totalRarity = items.reduce((sum, item) => sum + getRarityValue(item.rarity), 0);
+            let randomValue = Math.random() * totalRarity;
+            let selectedItem = null;
+            
+            for (const item of items) {
+                if (randomValue <= getRarityValue(item.rarity)) {
+                    selectedItem = item;
+                    break;
+                }
+                randomValue -= getRarityValue(item.rarity);
+            }
+            
+            // Если почему-то не выбрали (маловероятно), берем первый
+            if (!selectedItem) selectedItem = items[0];
+            
+            currentItem = selectedItem;
+            
+            // Вычисляем позицию, где этот элемент будет в центре
+            const itemWidth = 185; // 180px + 5px margin-right
+            const containerWidth = document.getElementById('animation-container').offsetWidth;
+            const centerPosition = Math.floor(containerWidth / 2) - Math.floor(itemWidth / 2);
+            
+            // Находим индекс выбранного элемента в анимации (последние 30 элементов)
+            const animationItemsCount = animationItems.children.length;
+            const searchStart = animationItemsCount - 30;
+            let targetIndex = -1;
+            
+            // Ищем наш выбранный предмет в последних элементах
+            for (let i = searchStart; i < animationItemsCount; i++) {
+                const nameElement = animationItems.children[i].querySelector('.name');
+                if (nameElement && nameElement.textContent === selectedItem.name) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+            
+            // Если не нашли (маловероятно), берем предпоследний
+            if (targetIndex === -1) targetIndex = animationItemsCount - 2;
+            
+            // Вычисляем целевую позицию для остановки
+            targetPosition = -(targetIndex * itemWidth - centerPosition);
+            
+            // Начинаем анимацию
+            currentPosition = 0;
+            slowingDown = false;
+            animationItems.style.left = currentPosition + 'px';
+            
+            if (animationInterval) clearInterval(animationInterval);
+            
+            // Устанавливаем скорость анимации в зависимости от выбора
+            const baseSpeed = openSpeed === 'fast' ? 20 : 50;
+            const speedVariation = Math.random() * 20 - 10; // от -10 до +10
+            animationSpeed = baseSpeed + speedVariation;
+            
+            animationInterval = setInterval(() => {
+                // Если еще не начали замедляться и прошли 70% пути
+                if (!slowingDown && currentPosition < targetPosition * 0.7) {
+                    slowingDown = true;
+                    animationSpeed = openSpeed === 'fast' ? 100 : 150; // Замедляемся
+                    
+                    // Подсветим все элементы с таким же именем
+                    const items = document.querySelectorAll('.animation-item');
+                    items.forEach(item => {
+                        const nameElement = item.querySelector('.name');
+                        if (nameElement && nameElement.textContent === selectedItem.name) {
+                            item.classList.add('highlight');
+                        }
+                    });
+                }
+                
+                // Двигаемся к цели
+                if (slowingDown) {
+                    // Приближаемся к цели с замедлением
+                    const distance = targetPosition - currentPosition;
+                    currentPosition += distance * 0.1;
+                    
+                    // Если очень близко, останавливаемся
+                    if (Math.abs(distance) < 5) {
+                        currentPosition = targetPosition;
+                        clearInterval(animationInterval);
+                        animationItems.style.left = currentPosition + 'px';
+                        showResult();
+                        return;
+                    }
+                } else {
+                    // Быстрое движение в начале
+                    currentPosition -= openSpeed === 'fast' ? 40 : 30;
+                }
+                
+                animationItems.style.left = currentPosition + 'px';
+            }, animationSpeed);
+        }
+        
+        // Получить числовое значение редкости
+        function getRarityValue(rarity) {
+            switch(rarity) {
+                case 'common': return 60;
+                case 'rare': return 25;
+                case 'epic': return 10;
+                case 'legendary': return 5;
+                case 'mythic': return 2;
+                case 'special': return 1;
+                default: return 10;
+            }
+        }
+        
+        // Показать результат
+        function showResult() {
+            const resultElement = document.getElementById('result');
+            const buttonsElement = document.getElementById('buttons');
+            
+            if (openCount > 1) {
+                resultElement.textContent = `🎉 Вы получили ${openCount} фигурок! 🎉`;
+                
+                // Для массового открытия сразу добавляем предметы в инвентарь
+                for (let i = 0; i < openCount; i++) {
+                    const items = caseItems[selectedCaseIndex];
+                    let totalRarity = items.reduce((sum, item) => sum + getRarityValue(item.rarity), 0);
+                    let randomValue = Math.random() * totalRarity;
+                    let selectedItem = null;
+                    
+                    for (const item of items) {
+                        if (randomValue <= getRarityValue(item.rarity)) {
+                            selectedItem = item;
+                            break;
+                        }
+                        randomValue -= getRarityValue(item.rarity);
+                    }
+                    
+                    if (!selectedItem) selectedItem = items[0];
+                    
+                    // Создаем копию объекта, чтобы можно было изменять level независимо
+                    const itemCopy = JSON.parse(JSON.stringify(selectedItem));
+                    inventory.push(itemCopy);
+                    stats.totalItemsReceived++;
+                    
+                    // Проверяем на легендарные предметы
+                    if (itemCopy.rarity === 'legendary' || itemCopy.rarity === 'mythic') {
+                        stats.legendaryItems++;
+                        updateQuestProgress('get_legendary', 1);
+                    }
+                }
+                
+                updateInventory();
+                buttonsElement.style.display = 'none';
+            } else {
+                resultElement.textContent = `🎉 Вы получили: ${currentItem.name} (${currentItem.price} ₽) 🎉`;
+                buttonsElement.style.display = 'flex';
+            }
+            
+            resultElement.style.display = 'block';
+            
+            // Разблокируем кейсы
+            document.querySelectorAll('.case').forEach(c => c.style.pointerEvents = 'auto');
+            
+            // Если это ключ, покажем модальное окно
+            if (currentItem && currentItem.isKey) {
+                keys++;
+                updateBalance();
+                setTimeout(() => {
+                    document.getElementById('key-modal').style.display = 'flex';
+                }, 1000);
+            }
+            
+            // Проверяем квест на получение легендарной фигурки
+            if (currentItem && (currentItem.rarity === 'legendary' || currentItem.rarity === 'mythic')) {
+                stats.legendaryItems++;
+                updateQuestProgress('get_legendary', 1);
+            }
+            
+            // Обновляем статистику
+            updateProfileStats();
+        }
+        
+        // Продать предмет
+        function sellItem() {
+            money += currentItem.price;
+            stats.totalMoneyEarned += currentItem.price;
+            updateBalance();
+            
+            // Обновляем квест на продажу
+            updateQuestProgress('sell_items', currentItem.price);
+            
+            // Эффект продажи
+            createConfetti(currentItem.rarity);
+            
+            hideResultElements();
+            
+            // Обновляем статистику
+            updateProfileStats();
+        }
+        
+        // Оставить предмет в инвентаре
+        function keepItem() {
+            // Создаем копию объекта, чтобы можно было изменять level независимо
+            const itemCopy = JSON.parse(JSON.stringify(currentItem));
+            inventory.push(itemCopy);
+            stats.totalItemsReceived++;
+            
+            // Проверяем на легендарные предметы
+            if (itemCopy.rarity === 'legendary' || itemCopy.rarity === 'mythic') {
+                stats.legendaryItems++;
+            }
+            
+            // Обновляем квест на сбор предметов
+            updateQuestProgress('collect_items', 1);
+            
+            // Эффект получения
+            createConfetti(currentItem.rarity);
+            
+            hideResultElements();
+            
+            // Обновляем статистику
+            updateInventory();
+            updateProfileStats();
+        }
+        
+        // Скрыть элементы результата
+        function hideResultElements() {
+            document.getElementById('animation-container').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('buttons').style.display = 'none';
+            
+            // Убрать подсветку
+            document.querySelectorAll('.animation-item').forEach(item => {
+                item.classList.remove('highlight');
+            });
+        }
+        
+        // Обновление инвентаря
+        function updateInventory() {
+            const inventoryItems = document.getElementById('inventory-items');
+            const emptyInventory = document.getElementById('empty-inventory');
+            inventoryItems.innerHTML = '';
+            
+            if (inventory.length === 0) {
+                emptyInventory.style.display = 'block';
+            } else {
+                emptyInventory.style.display = 'none';
+                
+                inventory.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'inventory-item';
+                    itemElement.innerHTML = `
+                        <div class="level">${item.level}</div>
+                        <div class="inventory-item-img">${item.emoji}</div>
+                        <div class="name">${item.name}</div>
+                        <div class="price">${item.price * item.level} ₽</div>
+                        <div class="item-actions">
+                            <button class="sell-inventory-btn" onclick="sellInventoryItem(${index})">Продать</button>
+                            <button class="upgrade-inventory-btn ${selectedForUpgrade.some(selected => selected.index === index) ? 'selected' : ''}" 
+                                    onclick="selectForUpgrade(${index})">
+                                ${selectedForUpgrade.some(selected => selected.index === index) ? '✓' : 'Выбрать'}
+                            </button>
+                        </div>
+                    `;
+                    inventoryItems.appendChild(itemElement);
+                });
+            }
+            
+            saveGame();
+        }
+        
+        // Продать предмет из инвентаря
+        function sellInventoryItem(index) {
+            if (index >= 0 && index < inventory.length) {
+                const item = inventory[index];
+                money += item.price * item.level;
+                stats.totalMoneyEarned += item.price * item.level;
+                
+                // Обновляем квест на продажу
+                updateQuestProgress('sell_items', item.price * item.level);
+                
+                inventory.splice(index, 1);
+                
+                // Обновляем выбранные для улучшения предметы
+                selectedForUpgrade = selectedForUpgrade.filter(selected => {
+                    if (selected.index > index) {
+                        selected.index--; // Сдвигаем индексы после удаленного
+                        return true;
+                    }
+                    return selected.index !== index;
+                });
+                
+                updateBalance();
+                updateInventory();
+                updateUpgradeTab();
+                
+                // Эффект продажи
+                createConfetti(item.rarity);
+                
+                // Обновляем статистику
+                updateProfileStats();
+            }
+        }
+        
+        // Выбрать предмет для улучшения
+        function selectForUpgrade(index) {
+            if (index >= 0 && index < inventory.length) {
+                const item = inventory[index];
+                
+                // Проверяем, не выбран ли уже этот предмет
+                const selectedIndex = selectedForUpgrade.findIndex(selected => selected.index === index);
+                
+                if (selectedIndex !== -1) {
+                    // Убираем из выбранных
+                    selectedForUpgrade.splice(selectedIndex, 1);
+                } else {
+                    // Проверяем, можно ли добавить (максимум 2)
+                    if (selectedForUpgrade.length < 2) {
+                        selectedForUpgrade.push({ index, item });
+                    } else {
+                        alert('Можно выбрать только 2 предмета для улучшения!');
+                        return;
+                    }
+                }
+                
+                updateUpgradeTab();
+                updateInventory(); // Обновляем кнопки выбора
+            }
+        }
+        
+        // Обновление вкладки улучшения
+        function updateUpgradeTab() {
+            const upgradeItems = document.getElementById('upgrade-items');
+            const upgradeBtn = document.getElementById('perform-upgrade');
+            const upgradeProgress = document.getElementById('upgrade-progress');
+            const upgradeChance = document.getElementById('upgrade-chance');
+            
+            upgradeItems.innerHTML = '';
+            
+            if (selectedForUpgrade.length === 0) {
+                upgradeBtn.disabled = true;
+                upgradeProgress.style.width = '0%';
+                upgradeProgress.textContent = '0%';
+                upgradeChance.textContent = '0';
+                return;
+            }
+            
+            // Отображаем выбранные предметы
+            selectedForUpgrade.forEach((selected, i) => {
+                const item = selected.item;
+                const itemElement = document.createElement('div');
+                itemElement.className = 'upgrade-item';
+                itemElement.innerHTML = `
+                    <div class="upgrade-item-img">${item.emoji}</div>
+                    <div class="upgrade-item-info">
+                        <div class="upgrade-item-name">${item.name}</div>
+                        <div class="upgrade-item-stats">
+                            <span class="upgrade-item-price">${item.price * item.level} ₽</span>
+                            <span> • Ур. ${item.level}</span>
+                        </div>
+                        <div>Редкость: <span class="rarity-${item.rarity}">${getRarityName(item.rarity)}</span></div>
+                    </div>
+                    <button onclick="selectForUpgrade(${selected.index})">✕</button>
+                `;
+                upgradeItems.appendChild(itemElement);
+            });
+            
+            // Проверяем, можно ли выполнить улучшение
+            let canUpgrade = true;
+            let chance = 0;
+            let baseLevel = 0;
+            
+            if (selectedForUpgrade.length === 2) {
+                const item1 = selectedForUpgrade[0].item;
+                const item2 = selectedForUpgrade[1].item;
+                
+                // Проверяем, что уровни одинаковые
+                if (item1.level !== item2.level) {
+                    canUpgrade = false;
+                } else {
+                    baseLevel = item1.level;
+                    
+                    // Рассчитываем шанс улучшения
+                    const rarity1 = getRarityValue(item1.rarity);
+                    const rarity2 = getRarityValue(item2.rarity);
+                    
+                    // Базовый шанс зависит от редкости предметов и их уровня
+                    chance = Math.min(90, 50 + (100 - (rarity1 + rarity2)/2) - (baseLevel * 10));
+                }
+            } else {
+                canUpgrade = false;
+            }
+            
+            upgradeBtn.disabled = !canUpgrade;
+            
+            if (canUpgrade) {
+                upgradeProgress.style.width = `${chance}%`;
+                upgradeProgress.textContent = `${chance}%`;
+                upgradeChance.textContent = chance;
+            } else {
+                upgradeProgress.style.width = '0%';
+                upgradeProgress.textContent = '0%';
+                upgradeChance.textContent = '0';
+            }
+        }
+        
+        // Получить название редкости
+        function getRarityName(rarity) {
+            switch(rarity) {
+                case 'common': return 'Обычная';
+                case 'rare': return 'Редкая';
+                case 'epic': return 'Эпическая';
+                case 'legendary': return 'Легендарная';
+                case 'mythic': return 'Мифическая';
+                case 'special': return 'Особая';
+                default: return 'Неизвестная';
+            }
+        }
+        
+        // Выполнить улучшение
+        function performUpgrade() {
+            if (selectedForUpgrade.length !== 2) return;
+            
+            const index1 = selectedForUpgrade[0].index;
+            const index2 = selectedForUpgrade[1].index;
+            const item1 = inventory[index1];
+            const item2 = inventory[index2];
+            
+            // Проверяем, что предметы еще существуют (не были проданы и т.д.)
+            if (!item1 || !item2 || item1.level !== item2.level) {
+                alert('Ошибка при улучшении!');
+                selectedForUpgrade = [];
+                updateUpgradeTab();
+                return;
+            }
+            
+            const baseLevel = item1.level;
+            
+            // Рассчитываем шанс улучшения
+            const rarity1 = getRarityValue(item1.rarity);
+            const rarity2 = getRarityValue(item2.rarity);
+            const chance = Math.min(90, 50 + (100 - (rarity1 + rarity2)/2) - (baseLevel * 10));
+            
+            // Определяем результат
+            const success = Math.random() * 100 < chance;
+            
+            // Удаляем использованные предметы
+            if (index1 > index2) {
+                inventory.splice(index1, 1);
+                inventory.splice(index2, 1);
+            } else {
+                inventory.splice(index2, 1);
+                inventory.splice(index1, 1);
+            }
+            
+            if (success) {
+                // Создаем улучшенный предмет
+                const upgradedItem = {
+                    ...item1,
+                    level: baseLevel + 1,
+                    price: Math.floor(item1.price * 1.5)
+                };
+                
+                inventory.push(upgradedItem);
+                stats.totalItemsReceived++;
+                
+                // Обновляем максимальный уровень
+                if (upgradedItem.level > stats.maxItemLevel) {
+                    stats.maxItemLevel = upgradedItem.level;
+                }
+                
+                // Обновляем квест на улучшение
+                updateQuestProgress('upgrade_items', 1);
+                
+                // Добавляем опыт за улучшение
+                addXp(20 * baseLevel);
+                
+                // Показываем результат
+                showUpgradeResult(true, upgradedItem);
+            } else {
+                // Показываем неудачу
+                showUpgradeResult(false);
+            }
+            
+            // Обновляем интерфейс
+            selectedForUpgrade = [];
+            updateInventory();
+            updateUpgradeTab();
+            updateProfileStats();
+            saveGame();
+        }
+        
+        // Показать результат улучшения
+        function showUpgradeResult(success, upgradedItem = null) {
+            const modal = document.getElementById('upgrade-modal');
+            const title = document.getElementById('upgrade-modal-title');
+            const text = document.getElementById('upgrade-modal-text');
+            const itemContainer = document.getElementById('upgrade-modal-item');
+            
+            if (success) {
+                title.textContent = '🎉 Улучшение успешно! 🎉';
+                text.textContent = `Вы получили предмет ${upgradedItem.name} уровня ${upgradedItem.level}!`;
+                
+                itemContainer.innerHTML = upgradedItem.emoji;
+                itemContainer.style.fontSize = '60px';
+                
+                // Эффект успеха
+                for (let i = 0; i < 100; i++) {
+                    createConfetti(upgradedItem.rarity);
+                }
+            } else {
+                title.textContent = '😢 Улучшение не удалось 😢';
+                text.textContent = 'К сожалению, улучшение не удалось. Вы потеряли оба предмета.';
+                itemContainer.innerHTML = '❌';
+                itemContainer.style.fontSize = '60px';
+                
+                // Эффект неудачи
+                createConfetti('common', 30, '#ff3333');
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Генерация квестов
+        function generateQuests() {
+            if (quests.length === 0) {
+                // Выбираем 3 случайных квеста из доступных
+                const availableQuests = allQuests.filter(quest => 
+                    !completedQuests.includes(quest.id) && 
+                    !quests.some(q => q.id === quest.id)
+                );
+                
+                // Сортируем по сложности (по reward.xp)
+                availableQuests.sort((a, b) => a.reward.xp - b.reward.xp);
+                
+                // Берем 3 квеста: один легкий, один средний, один сложный
+                const easyQuests = availableQuests.slice(0, Math.ceil(availableQuests.length / 3));
+                const mediumQuests = availableQuests.slice(
+                    Math.ceil(availableQuests.length / 3), 
+                    Math.ceil(availableQuests.length * 2 / 3)
+                );
+                const hardQuests = availableQuests.slice(Math.ceil(availableQuests.length * 2 / 3));
+                
+                if (easyQuests.length > 0) quests.push({...easyQuests[0]});
+                if (mediumQuests.length > 0) quests.push({...mediumQuests[0]});
+                if (hardQuests.length > 0) quests.push({...hardQuests[0]});
+                
+                // Если квестов меньше 3, добавляем любые доступные
+                while (quests.length < 3 && availableQuests.length > 0) {
+                    const randomQuest = availableQuests[Math.floor(Math.random() * availableQuests.length)];
+                    if (!quests.some(q => q.id === randomQuest.id)) {
+                        quests.push({...randomQuest});
+                    }
+                }
+            }
+            
+            // Обновляем текущие значения для квестов
+            quests.forEach(quest => {
+                switch(quest.type) {
+                    case 'open_cases':
+                        quest.current = Math.min(openedCases, quest.target);
+                        break;
+                    case 'collect_items':
+                        quest.current = Math.min(inventory.length, quest.target);
+                        break;
+                    case 'sell_items':
+                        // Для этого квеста current обновляется при продаже
+                        break;
+                    case 'upgrade_items':
+                        // Для этого квеста current обновляется при улучшении
+                        break;
+                    case 'open_rare_cases':
+                        // Для этого квеста current обновляется при открытии редких кейсов
+                        break;
+                    case 'get_legendary':
+                        // Для этого квеста current обновляется при получении легендарной фигурки
+                        const legendaryCount = inventory.filter(item => 
+                            item.rarity === 'legendary' || item.rarity === 'mythic'
+                        ).length;
+                        quest.current = Math.min(legendaryCount, quest.target);
+                        break;
+                    case 'win_battles':
+                        // Для этого квеста current обновляется при победе в баттлах
+                        quest.current = Math.min(stats.battleWins, quest.target);
+                        break;
+                }
+            });
+            
+            saveGame();
+        }
+        
+        // Обновление прогресса квеста
+        function updateQuestProgress(type, value) {
+            let updated = false;
+            
+            quests.forEach(quest => {
+                if (quest.type === type) {
+                    quest.current = Math.min(quest.current + value, quest.target);
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                updateQuests();
+                saveGame();
+            }
+        }
+        
+        // Обновление отображения квестов
+        function updateQuests() {
+            const questsContainer = document.getElementById('quests-container');
+            const questsBadge = document.getElementById('quests-badge');
+            
+            questsContainer.innerHTML = '';
+            
+            let completedCount = 0;
+            
+            quests.forEach(quest => {
+                const questElement = document.createElement('div');
+                questElement.className = 'quest';
+                
+                const isCompleted = quest.current >= quest.target;
+                if (isCompleted) completedCount++;
+                
+                questElement.innerHTML = `
+                    <div class="quest-title">${quest.title}</div>
+                    <div class="quest-description">${quest.description}</div>
+                    <div class="quest-reward">
+                        <span class="quest-reward-icon">🎁</span>
+                        Награда: 
+                        ${quest.reward.money ? `${quest.reward.money} ₽` : ''}
+                        ${quest.reward.keys ? `, ${quest.reward.keys} 🔑` : ''}
+                        , ${quest.reward.xp} XP
+                    </div>
+                    <div class="quest-progress">
+                        <div class="quest-progress-bar" style="width: ${(quest.current / quest.target) * 100}%"></div>
+                    </div>
+                    <button class="quest-complete-btn" ${isCompleted ? '' : 'disabled'} 
+                            onclick="completeQuest(${quest.id})">
+                        ${isCompleted ? 'Получить награду' : 'Не выполнено'}
+                    </button>
+                `;
+                
+                questsContainer.appendChild(questElement);
+            });
+            
+            // Показываем бейдж, если есть выполненные квесты
+            if (completedCount > 0) {
+                questsBadge.textContent = completedCount;
+                questsBadge.style.display = 'inline-flex';
+            } else {
+                questsBadge.style.display = 'none';
+            }
+        }
+        
+        // Завершение квеста
+        function completeQuest(questId) {
+            const questIndex = quests.findIndex(q => q.id === questId);
+            
+            if (questIndex !== -1 && quests[questIndex].current >= quests[questIndex].target) {
+                const quest = quests[questIndex];
+                
+                // Выдаем награду
+                if (quest.reward.money) {
+                    money += quest.reward.money;
+                    stats.totalMoneyEarned += quest.reward.money;
+                }
+                
+                if (quest.reward.keys) {
+                    keys += quest.reward.keys;
+                }
+                
+                addXp(quest.reward.xp);
+                
+                // Перемещаем квест в выполненные
+                completedQuests.push(quest.id);
+                quests.splice(questIndex, 1);
+                stats.questsCompleted++;
+                
+                // Показываем модальное окно с наградой
+                document.getElementById('quest-complete-modal-text').textContent = 
+                    `Вы выполнили задание "${quest.title}" и получили: ${quest.reward.money ? `${quest.reward.money} ₽` : ''} ${quest.reward.keys ? `${quest.reward.keys} ключей` : ''} ${quest.reward.xp} опыта!`;
+                document.getElementById('quest-complete-modal-item').textContent = '🎁';
+                document.getElementById('quest-complete-modal').style.display = 'flex';
+                
+                // Генерируем новые квесты, если нужно
+                generateQuests();
+                updateQuests();
+                updateBalance();
+                updateProfileStats();
+                saveGame();
+            }
+        }
+        
+        // Проверка ежедневного бонуса
+        function checkDailyBonus() {
+            const now = new Date();
+            const today = now.toDateString();
+            
+            if (lastDailyBonusDate) {
+                const lastDate = new Date(lastDailyBonusDate).toDateString();
+                dailyBonusAvailable = lastDate !== today;
+            } else {
+                dailyBonusAvailable = true;
+            }
+            
+            const dailyBonusBtn = document.getElementById('daily-bonus-btn');
+            
+            if (dailyBonusAvailable) {
+                dailyBonusBtn.textContent = 'Получить бонус';
+                dailyBonusBtn.disabled = false;
+            } else {
+                dailyBonusBtn.disabled = true;
+                startDailyBonusTimer();
+            }
+        }
+        
+        // Таймер до следующего ежедневного бонуса
+        function startDailyBonusTimer() {
+            const dailyBonusBtn = document.getElementById('daily-bonus-btn');
+            
+            if (!dailyBonusAvailable) {
+                const now = new Date();
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                
+                const diff = tomorrow - now;
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                dailyBonusBtn.textContent = `Получить через ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                setTimeout(startDailyBonusTimer, 1000);
+            }
+        }
+        
+        // Получить ежедневный бонус
+        function claimDailyBonus() {
+            if (dailyBonusAvailable) {
+                const bonusAmount = 500 + level * 100;
+                money += bonusAmount;
+                stats.totalMoneyEarned += bonusAmount;
+                addXp(50);
+                
+                lastDailyBonusDate = new Date();
+                dailyBonusAvailable = false;
+                
+                // Показываем модальное окно с бонусом
+                document.getElementById('daily-bonus-modal-text').textContent = 
+                    `Вы получили ежедневный бонус: ${bonusAmount} ₽ и 50 опыта!`;
+                document.getElementById('daily-bonus-modal-item').textContent = '💰';
+                document.getElementById('daily-bonus-modal').style.display = 'flex';
+                
+                checkDailyBonus();
+                updateBalance();
+                updateProfileStats();
+                saveGame();
+            }
+        }
+        
+        // Добавление опыта
+        function addXp(amount) {
+            xp += amount;
+            
+            // Проверяем, не достигли ли нового уровня
+            while (xp >= nextLevelXp) {
+                xp -= nextLevelXp;
+                level++;
+                nextLevelXp = Math.floor(nextLevelXp * 1.5);
+                
+                // Показываем модальное окно повышения уровня
+                document.getElementById('level-up-modal-text').textContent = 
+                    `Поздравляем! Вы достигли ${level} уровня!`;
+                document.getElementById('level-up-modal').style.display = 'flex';
+                
+                // Эффект повышения уровня
+                for (let i = 0; i < 200; i++) {
+                    createConfetti('legendary');
+                }
+            }
+            
+            updateBalance();
+            updateProfileStats();
+        }
+        
+        // Обновление статистики профиля
+        function updateProfileStats() {
+            document.getElementById('profile-level').textContent = level;
+            document.getElementById('profile-level-progress').style.width = `${(xp / nextLevelXp) * 100}%`;
+            
+            document.getElementById('stat-cases-opened').textContent = stats.totalCasesOpened;
+            document.getElementById('stat-items-received').textContent = stats.totalItemsReceived;
+            document.getElementById('stat-money-earned').textContent = `${stats.totalMoneyEarned} ₽`;
+            document.getElementById('stat-max-level').textContent = stats.maxItemLevel;
+            document.getElementById('stat-legendary-items').textContent = stats.legendaryItems;
+            document.getElementById('stat-quests-completed').textContent = stats.questsCompleted;
+            document.getElementById('stat-battle-wins').textContent = stats.battleWins;
+            document.getElementById('stat-rating').textContent = rating;
+        }
+        
+        // Закрыть модальное окно
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // Создать конфетти
+        function createConfetti(rarity, count = 50, color = null) {
+            if (!color) {
+                switch(rarity) {
+                    case 'common': color = '#aaa'; break;
+                    case 'rare': color = '#4d88ff'; break;
+                    case 'epic': color = '#b347ea'; break;
+                    case 'legendary': color = '#ffaa00'; break;
+                    case 'mythic': color = '#ff3366'; break;
+                    case 'special': color = '#33cc99'; break;
+                    default: color = '#ffcc00';
+                }
+            }
+            
+            for (let i = 0; i < count; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = color;
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                confetti.style.animationDuration = Math.random() * 3 + 2 + 's';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                document.body.appendChild(confetti);
+                
+                // Удаляем конфетти после анимации
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Case Battle: выбор типа баттла
+        function selectBattleOption(optionIndex) {
+            selectedBattleOption = optionIndex;
+            
+            // Убираем выделение у всех вариантов
+            document.querySelectorAll('.battle-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный вариант
+            event.currentTarget.classList.add('selected');
+            
+            // Активируем кнопку старта
+            document.getElementById('battle-start-btn').disabled = false;
+            document.getElementById('battle-start-btn').textContent = 'Начать баттл';
+        }
+        
+        // Case Battle: начать баттл
+        function startBattle() {
+            if (selectedBattleOption === -1) return;
+            
+            const battlePrice = [100, 300, 500, 1000][selectedBattleOption];
+            
+            if (money < battlePrice) {
+                alert(`Недостаточно средств! Нужно ${battlePrice} ₽`);
+                return;
+            }
+            
+            money -= battlePrice;
+            updateBalance();
+            
+            battleInProgress = true;
+            battleParticipants = [];
+            battleResults = [];
+            
+            // Создаем участников баттла (ботов)
+            const minParticipants = [2, 3, 4, 5][selectedBattleOption];
+            const maxParticipants = [4, 5, 6, 8][selectedBattleOption];
+            const participantsCount = Math.floor(Math.random() * (maxParticipants - minParticipants + 1)) + minParticipants;
+            
+            // Добавляем игрока
+            battleParticipants.push({
+                name: "Вы",
+                avatar: "👤",
+                isPlayer: true,
+                caseIndex: selectedBattleOption,
+                item: null,
+                value: 0
+            });
+            
+            // Добавляем ботов
+            for (let i = 0; i < participantsCount - 1; i++) {
+                const botName = botNames[Math.floor(Math.random() * botNames.length)];
+                const botAvatar = ["🤖", "👾", "👽", "🤠", "🦹", "🧛", "🧙", "🧝"][Math.floor(Math.random() * 8)];
+                
+                battleParticipants.push({
+                    name: botName,
+                    avatar: botAvatar,
+                    isPlayer: false,
+                    caseIndex: selectedBattleOption,
+                    item: null,
+                    value: 0
+                });
+            }
+            
+            // Перемешиваем участников
+            battleParticipants = shuffleArray(battleParticipants);
+            
+            // Открываем кейсы для всех участников
+            battleParticipants.forEach(participant => {
+                const items = caseItems[participant.caseIndex];
+                let totalRarity = items.reduce((sum, item) => sum + getRarityValue(item.rarity), 0);
+                let randomValue = Math.random() * totalRarity;
+                let selectedItem = null;
+                
+                for (const item of items) {
+                    if (randomValue <= getRarityValue(item.rarity)) {
+                        selectedItem = item;
+                        break;
+                    }
+                    randomValue -= getRarityValue(item.rarity);
+                }
+                
+                if (!selectedItem) selectedItem = items[0];
+                
+                participant.item = selectedItem;
+                participant.value = selectedItem.price;
+                
+                // Для ботов добавляем случайное отклонение в стоимости (чтобы было интереснее)
+                if (!participant.isPlayer) {
+                    participant.value = Math.floor(selectedItem.price * (0.8 + Math.random() * 0.4));
+                }
+            });
+            
+            // Сортируем участников по стоимости полученного предмета
+            battleParticipants.sort((a, b) => b.value - a.value);
+            
+            // Определяем победителя
+            const winner = battleParticipants[0];
+            
+            // Если победил игрок
+            if (winner.isPlayer) {
+                // Награда зависит от количества участников и типа баттла
+                const rewardMultiplier = [1.5, 2, 2.5, 3][selectedBattleOption];
+                const reward = Math.floor(battlePrice * participantsCount * rewardMultiplier);
+                
+                money += reward;
+                stats.battleWins++;
+                rating += 25 * (selectedBattleOption + 1);
+                
+                // Обновляем квест на победу в баттлах
+                updateQuestProgress('win_battles', 1);
+                
+                // Показываем модальное окно победы
+                document.getElementById('battle-win-modal-text').textContent = 
+                    `Вы победили в баттле и получили ${reward} ₽! Ваш рейтинг увеличился.`;
+                document.getElementById('battle-win-modal-item').textContent = '🏆';
+                document.getElementById('battle-win-modal').style.display = 'flex';
+                
+                // Эффект победы
+                for (let i = 0; i < 200; i++) {
+                    createConfetti('legendary');
+                }
+            } else {
+                // Если победил бот
+                rating = Math.max(500, rating - 10 * (selectedBattleOption + 1));
+            }
+            
+            // Показываем результаты баттла
+            showBattleResults();
+            
+            updateBalance();
+            updateProfileStats();
+            saveGame();
+        }
+        
+        // Показать результаты баттла
+        function showBattleResults() {
+            const participantsContainer = document.getElementById('battle-participants');
+            const rewardContainer = document.getElementById('battle-reward');
+            const resultsContainer = document.getElementById('battle-results');
+            
+            participantsContainer.innerHTML = '';
+            
+            battleParticipants.forEach((participant, index) => {
+                const participantElement = document.createElement('div');
+                participantElement.className = `battle-participant ${index === 0 ? 'winner' : ''}`;
+                participantElement.innerHTML = `
+                    <div class="battle-participant-avatar">${participant.avatar}</div>
+                    <div class="battle-participant-name">${participant.name}</div>
+                    <div class="battle-participant-item">${participant.item.emoji}</div>
+                    <div>${participant.item.name}</div>
+                    <div class="battle-participant-value">${participant.value} ₽</div>
+                `;
+                participantsContainer.appendChild(participantElement);
+            });
+            
+            // Показываем награду, если победил игрок
+            if (battleParticipants[0].isPlayer) {
+                const rewardMultiplier = [1.5, 2, 2.5, 3][selectedBattleOption];
+                const reward = Math.floor([100, 300, 500, 1000][selectedBattleOption] * battleParticipants.length * rewardMultiplier);
+                
+                rewardContainer.innerHTML = `🏆 Вы победили и получили ${reward} ₽! 🏆`;
+                rewardContainer.style.display = 'block';
+            } else {
+                rewardContainer.style.display = 'none';
+            }
+            
+            // Показываем контейнер с результатами
+            resultsContainer.style.display = 'block';
+            
+            // Скрываем кнопку старта
+            document.getElementById('battle-start-btn').style.display = 'none';
+        }
+        
+        // Сбросить баттл
+        function resetBattle() {
+            document.getElementById('battle-results').style.display = 'none';
+            document.getElementById('battle-start-btn').style.display = 'block';
+            document.getElementById('battle-start-btn').disabled = false;
+            document.getElementById('battle-start-btn').textContent = 'Начать баттл';
+            
+            // Снимаем выделение с выбранного варианта
+            document.querySelectorAll('.battle-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            selectedBattleOption = -1;
+            battleInProgress = false;
+        }
+        
+        // Перемешать массив
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        // Инициализация игры при загрузке
+        window.onload = function() {
+            initGame();
+            
+            // Назначаем обработчик для ежедневного бонуса
+            document.getElementById('daily-bonus-btn').addEventListener('click', claimDailyBonus);
+            
+            // Назначаем обработчик изменения количества кейсов
+            document.getElementById('case-count').addEventListener('change', function() {
+                let value = parseInt(this.value);
+                if (isNaN(value) || value < 1) {
+                    this.value = 1;
+                } else if (value > 10) {
+                    this.value = 10;
+                }
+                openCount = parseInt(this.value);
+            });
+        };
+    </script>
+</body>
+</html>
