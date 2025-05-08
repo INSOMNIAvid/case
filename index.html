@@ -1,717 +1,563 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS2 Case Opener Deluxe</title>
+    <title>Case Battle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            text-align: center;
+        :root {
+            --primary: #6C5DD3;
+            --primary-dark: #5041a8;
+            --secondary: #FF754C;
+            --dark: #1F2128;
+            --dark-2: #242731;
+            --gray: #E4E4E4;
+            --light: #F5F5F5;
+            --white: #FFFFFF;
+            --green: #7FBA7A;
+            --red: #FF754C;
+        }
+        
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--white);
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 0 20px;
         }
         
-        h1 {
-            color: #f0c808;
-            text-shadow: 0 0 5px #f0c808;
-            margin-bottom: 30px;
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--white);
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
         }
         
         .balance {
-            font-size: 24px;
-            margin-bottom: 20px;
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            display: inline-block;
+            background-color: var(--dark-2);
+            padding: 8px 16px;
+            border-radius: 12px;
+            margin-right: 20px;
+            font-weight: 600;
         }
         
         .balance span {
-            color: #f0c808;
-            font-weight: bold;
+            color: var(--primary);
         }
         
-        .case-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .case {
-            width: 200px;
+        .btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.3s;
-            position: relative;
+            border: none;
+            transition: all 0.3s;
         }
         
-        .case:hover {
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+        
+        main {
+            padding: 40px 0;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        .battles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .battle-card {
+            background-color: var(--dark-2);
+            border-radius: 16px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .battle-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .battle-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .battle-card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .battle-card-price {
+            background-color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .battle-card-participants {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .participant {
+            text-align: center;
+        }
+        
+        .participant-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--dark);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .participant-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .participant-name {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .vs {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+        
+        .battle-card-timer {
+            background-color: var(--dark);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .battle-card-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .battle-card-btn {
+            width: 48%;
+        }
+        
+        .cases-section {
+            margin-top: 40px;
+        }
+        
+        .cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .case-card {
+            background-color: var(--dark-2);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .case-card:hover {
             transform: scale(1.05);
         }
         
         .case-image {
             width: 100%;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            border: 3px solid #333;
-        }
-        
-        .case-name {
-            margin-top: 10px;
-            font-weight: bold;
-            color: #f0c808;
-        }
-        
-        .case-price {
-            color: #aaa;
-            font-size: 14px;
-        }
-        
-        .open-area {
-            margin: 30px 0;
-            min-height: 300px;
-            position: relative;
-        }
-        
-        .case-display {
-            width: 300px;
-            height: 200px;
-            margin: 0 auto;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            border: 3px solid #333;
+            height: 120px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            text-shadow: 0 0 5px black;
         }
         
-        .open-btn {
-            background-color: #f0c808;
-            color: #1a1a1a;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 20px 0;
-            transition: all 0.3s;
+        .case-image img {
+            max-width: 100%;
+            max-height: 100%;
         }
         
-        .open-btn:hover {
-            background-color: #ffd700;
-            transform: scale(1.05);
-        }
-        
-        .open-btn:disabled {
-            background-color: #666;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .result {
-            margin-top: 30px;
-            min-height: 200px;
-            display: none;
-        }
-        
-        .item {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            border: 3px solid;
-            max-width: 250px;
-            animation: glow 0.5s ease-out;
-        }
-        
-        @keyframes glow {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        
-        .item img {
-            width: 150px;
-            height: 112px;
-            object-fit: contain;
-        }
-        
-        .item-name {
-            color: #f0c808;
-            font-weight: bold;
-            margin: 10px 0;
-            font-size: 18px;
-        }
-        
-        .item-rarity {
-            font-size: 14px;
+        .case-name {
+            font-weight: 600;
             margin-bottom: 5px;
         }
         
-        .item-price {
-            font-weight: bold;
-            font-size: 16px;
+        .case-price {
+            color: var(--primary);
+            font-weight: 600;
         }
         
-        .blue { border-color: #5d9cec; }
-        .purple { border-color: #ac92ec; }
-        .pink { border-color: #ec87c0; }
-        .red { border-color: #ed5565; }
-        .gold { border-color: #f0c808; }
-        
-        .blue .item-rarity { color: #5d9cec; }
-        .purple .item-rarity { color: #ac92ec; }
-        .pink .item-rarity { color: #ec87c0; }
-        .red .item-rarity { color: #ed5565; }
-        .gold .item-rarity { color: #f0c808; }
-        
-        .inventory {
-            margin-top: 40px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-        
-        .inventory-items {
-            display: flex;
-            flex-wrap: wrap;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
             justify-content: center;
-            gap: 15px;
+        }
+        
+        .modal-content {
+            background-color: var(--dark-2);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .case-open-container {
+            text-align: center;
+        }
+        
+        .case-preview {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .case-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .open-case-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
             margin-top: 20px;
         }
         
-        .inventory-item {
-            width: 120px;
-            padding: 10px;
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            border: 2px solid #333;
-            transition: all 0.3s;
-        }
-        
-        .inventory-item:hover {
-            border-color: #f0c808;
-            transform: scale(1.05);
-        }
-        
-        .inventory-item img {
-            width: 100px;
-            height: 75px;
-            object-fit: contain;
-        }
-        
-        .inventory-item-name {
-            font-size: 12px;
-            margin: 5px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .inventory-item-price {
-            font-size: 11px;
-            color: #f0c808;
-        }
-        
-        .sell-btn {
-            background-color: #ed5565;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            font-size: 11px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-top: 5px;
-            width: 100%;
-        }
-        
-        .sell-btn:hover {
-            background-color: #d9434e;
-        }
-        
-        .history {
-            margin-top: 40px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-        }
-        
-        .history-items {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 15px;
-            text-align: left;
-            padding: 0 20px;
-        }
-        
-        .history-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #333;
-            font-size: 14px;
-        }
-        
-        .history-item span {
-            float: right;
-            color: #f0c808;
-            font-weight: bold;
-        }
-        
-        .stats {
-            margin-top: 40px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        
-        .stat {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 8px;
-            min-width: 150px;
-            margin: 10px;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            color: #f0c808;
-            font-weight: bold;
-            margin: 5px 0;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        /* Animation for case opening */
-        @keyframes spin {
-            0% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); }
-        }
-        
-        .spinning {
-            animation: spin 0.5s linear infinite;
-        }
-        
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: #2a2a2a;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: #f0c808;
-            border-radius: 4px;
-        }
-        
-        /* Responsive design */
         @media (max-width: 768px) {
-            .case {
-                width: 150px;
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
             }
             
-            .case-image {
-                height: 100px;
+            nav ul {
+                margin: 20px 0;
             }
             
-            .item img {
-                width: 120px;
-                height: 90px;
+            nav ul li {
+                margin-left: 15px;
+                margin-right: 15px;
+            }
+            
+            .user-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .battles-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>CS2 CASE OPENER DELUXE</h1>
-        
-        <div class="balance">
-            Ваш баланс: <span id="userBalance">1000</span>₽
-        </div>
-        
-        <div class="case-container">
-            <div class="case" data-case="bravo">
-                <div class="case-image" style="background-image: url('https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA');"></div>
-                <div class="case-name">Bravo Case</div>
-                <div class="case-price">199₽</div>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Case<span>Battle</span></div>
+                <nav>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Battles</a></li>
+                        <li><a href="#">Cases</a></li>
+                        <li><a href="#">Top</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </nav>
+                <div class="user-actions">
+                    <div class="balance">Balance: <span>$0.00</span></div>
+                    <button class="btn btn-outline">Deposit</button>
+                </div>
             </div>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <section>
+                <h2 class="section-title">Active Battles</h2>
+                <div class="battles-grid">
+                    <div class="battle-card">
+                        <div class="battle-card-header">
+                            <div class="battle-card-title">2 Players</div>
+                            <div class="battle-card-price">$10</div>
+                        </div>
+                        <div class="battle-card-participants">
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <img src="https://via.placeholder.com/60" alt="Player">
+                                </div>
+                                <div class="participant-name">Player1</div>
+                            </div>
+                            <div class="vs">VS</div>
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <div style="background-color: #6C5DD3; display: flex; align-items: center; justify-content: center; color: white;">?</div>
+                                </div>
+                                <div class="participant-name">Waiting...</div>
+                            </div>
+                        </div>
+                        <div class="battle-card-timer">00:32 left</div>
+                        <div class="battle-card-footer">
+                            <button class="btn btn-primary battle-card-btn">Join</button>
+                            <button class="btn btn-outline battle-card-btn">View</button>
+                        </div>
+                    </div>
+                    
+                    <div class="battle-card">
+                        <div class="battle-card-header">
+                            <div class="battle-card-title">5 Players</div>
+                            <div class="battle-card-price">$25</div>
+                        </div>
+                        <div class="battle-card-participants">
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <img src="https://via.placeholder.com/60" alt="Player">
+                                </div>
+                                <div class="participant-name">Player2</div>
+                            </div>
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <img src="https://via.placeholder.com/60" alt="Player">
+                                </div>
+                                <div class="participant-name">Player3</div>
+                            </div>
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <div style="background-color: #6C5DD3; display: flex; align-items: center; justify-content: center; color: white;">?</div>
+                                </div>
+                                <div class="participant-name">Waiting...</div>
+                            </div>
+                        </div>
+                        <div class="battle-card-timer">01:45 left</div>
+                        <div class="battle-card-footer">
+                            <button class="btn btn-primary battle-card-btn">Join</button>
+                            <button class="btn btn-outline battle-card-btn">View</button>
+                        </div>
+                    </div>
+                    
+                    <div class="battle-card">
+                        <div class="battle-card-header">
+                            <div class="battle-card-title">10 Players</div>
+                            <div class="battle-card-price">$100</div>
+                        </div>
+                        <div class="battle-card-participants">
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <img src="https://via.placeholder.com/60" alt="Player">
+                                </div>
+                                <div class="participant-name">Player4</div>
+                            </div>
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <img src="https://via.placeholder.com/60" alt="Player">
+                                </div>
+                                <div class="participant-name">Player5</div>
+                            </div>
+                            <div class="participant">
+                                <div class="participant-avatar">
+                                    <div style="background-color: #6C5DD3; display: flex; align-items: center; justify-content: center; color: white;">+5</div>
+                                </div>
+                                <div class="participant-name">5 players</div>
+                            </div>
+                        </div>
+                        <div class="battle-card-timer">03:12 left</div>
+                        <div class="battle-card-footer">
+                            <button class="btn btn-primary battle-card-btn">Join</button>
+                            <button class="btn btn-outline battle-card-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
             
-            <div class="case" data-case="chroma">
-                <div class="case-image" style="background-image: url('https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA');"></div>
-                <div class="case-name">Chroma Case</div>
-                <div class="case-price">249₽</div>
-            </div>
-            
-            <div class="case" data-case="gamma">
-                <div class="case-image" style="background-image: url('https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA');"></div>
-                <div class="case-name">Gamma Case</div>
-                <div class="case-price">299₽</div>
-            </div>
-            
-            <div class="case" data-case="spectrum">
-                <div class="case-image" style="background-image: url('https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA');"></div>
-                <div class="case-name">Spectrum Case</div>
-                <div class="case-price">349₽</div>
-            </div>
+            <section class="cases-section">
+                <h2 class="section-title">Popular Cases</h2>
+                <div class="cases-grid">
+                    <div class="case-card">
+                        <div class="case-image">
+                            <img src="https://via.placeholder.com/120x80" alt="Dragon Case">
+                        </div>
+                        <div class="case-name">Dragon Case</div>
+                        <div class="case-price">$5.00</div>
+                    </div>
+                    
+                    <div class="case-card">
+                        <div class="case-image">
+                            <img src="https://via.placeholder.com/120x80" alt="Phoenix Case">
+                        </div>
+                        <div class="case-name">Phoenix Case</div>
+                        <div class="case-price">$10.00</div>
+                    </div>
+                    
+                    <div class="case-card">
+                        <div class="case-image">
+                            <img src="https://via.placeholder.com/120x80" alt="Legend Case">
+                        </div>
+                        <div class="case-name">Legend Case</div>
+                        <div class="case-price">$25.00</div>
+                    </div>
+                    
+                    <div class="case-card">
+                        <div class="case-image">
+                            <img src="https://via.placeholder.com/120x80" alt="Mythic Case">
+                        </div>
+                        <div class="case-name">Mythic Case</div>
+                        <div class="case-price">$50.00</div>
+                    </div>
+                    
+                    <div class="case-card">
+                        <div class="case-image">
+                            <img src="https://via.placeholder.com/120x80" alt="Ancient Case">
+                        </div>
+                        <div class="case-name">Ancient Case</div>
+                        <div class="case-price">$100.00</div>
+                    </div>
+                </div>
+            </section>
         </div>
-        
-        <div class="open-area">
-            <div class="case-display" id="caseDisplay">
-                Выберите кейс для открытия
-            </div>
-            <button class="open-btn" id="openBtn" disabled>ОТКРЫТЬ КЕЙС</button>
-        </div>
-        
-        <div class="result" id="result">
-            <h2>ВЫ ВЫИГРАЛИ:</h2>
-            <div id="wonItem"></div>
-        </div>
-        
-        <div class="inventory">
-            <h2>ВАШ ИНВЕНТАРЬ</h2>
-            <div class="inventory-items" id="inventoryItems">
-                <!-- Inventory items will be added here -->
-            </div>
-        </div>
-        
-        <div class="history">
-            <h2>ИСТОРИЯ ОТКРЫТИЙ</h2>
-            <div class="history-items" id="historyItems">
-                <!-- History items will be added here -->
-            </div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-value" id="totalOpened">0</div>
-                <div class="stat-label">Открыто кейсов</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="totalSpent">0</div>
-                <div class="stat-label">Потрачено денег</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="totalEarned">0</div>
-                <div class="stat-label">Заработано денег</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value" id="bestItem">-</div>
-                <div class="stat-label">Лучший предмет</div>
+    </main>
+    
+    <div class="modal" id="caseModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 class="modal-title">Dragon Case</h3>
+            <div class="case-open-container">
+                <div class="case-preview">
+                    <img src="https://via.placeholder.com/200x150" alt="Dragon Case">
+                </div>
+                <p>Contains high-value items with Dragon theme</p>
+                <button class="btn btn-primary open-case-btn">Open Case ($5.00)</button>
             </div>
         </div>
     </div>
     
     <script>
-        // Game data
-        const cases = {
-            bravo: {
-                name: "Bravo Case",
-                price: 199,
-                image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA",
-                items: [
-                    { name: "P250 | Песчаная дюна", rarity: "blue", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhz3MzbcDNG09GzkImemrmlYumGwW0H65Z337uQpNTw3wLi_RE_ZG-lLYWWI1VrMlDY-la2yL_om9bi609Wg2uD/62fx62fdpx2x", price: 50 },
-                    { name: "Glock-18 | Костяная роспись", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw", price: 75 },
-                    { name: "USP-S | Кровавый тигр", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09Svq5KOk-P9NL7DqWdY781lxO-Z9Nul2wLm-UNuNTr3dtWXdAFvYg2F_Ae2wrq9gpXquszLmHQ36yM8pSGKO4Vc8KU/360fx360f", price: 200 },
-                    { name: "AK-47 | Красная линия", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA/360fx360f", price: 300 },
-                    { name: "AWP | Электрический горилль", rarity: "pink", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 800 },
-                    { name: "M4A4 | Королевский рыцарь", rarity: "red", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 1500 },
-                    { name: "Нож | Бабочка | Ультрафиолет", rarity: "gold", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 5000 }
-                ]
-            },
-            chroma: {
-                name: "Chroma Case",
-                price: 249,
-                image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA",
-                items: [
-                    { name: "P2000 | Гранит", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhz3MzbcDNG09GzkImemrmlYumGwW0H65Z337uQpNTw3wLi_RE_ZG-lLYWWI1VrMlDY-la2yL_om9bi609Wg2uD/62fx62fdpx2x", price: 60 },
-                    { name: "MP9 | Зеленый газ", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw", price: 85 },
-                    { name: "AWP | Красная линия", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09Svq5KOk-P9NL7DqWdY781lxO-Z9Nul2wLm-UNuNTr3dtWXdAFvYg2F_Ae2wrq9gpXquszLmHQ36yM8pSGKO4Vc8KU/360fx360f", price: 250 },
-                    { name: "M4A1-S | Кибербезопасность", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA/360fx360f", price: 350 },
-                    { name: "AK-47 | Вулькан", rarity: "pink", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 900 },
-                    { name: "AWP | Азимов", rarity: "red", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 1800 },
-                    { name: "Нож | Керамбит | Допплер", rarity: "gold", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 6000 }
-                ]
-            },
-            gamma: {
-                name: "Gamma Case",
-                price: 299,
-                image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA",
-                items: [
-                    { name: "P90 | Холодное сердце", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhz3MzbcDNG09GzkImemrmlYumGwW0H65Z337uQpNTw3wLi_RE_ZG-lLYWWI1VrMlDY-la2yL_om9bi609Wg2uD/62fx62fdpx2x", price: 70 },
-                    { name: "Desert Eagle | Коричневая змея", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw", price: 95 },
-                    { name: "USP-S | Киллконфирм", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09Svq5KOk-P9NL7DqWdY781lxO-Z9Nul2wLm-UNuNTr3dtWXdAFvYg2F_Ae2wrq9gpXquszLmHQ36yM8pSGKO4Vc8KU/360fx360f", price: 300 },
-                    { name: "AK-47 | Гидропоника", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA/360fx360f", price: 400 },
-                    { name: "M4A4 | Дракон король", rarity: "pink", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 1000 },
-                    { name: "AWP | Медвежонок", rarity: "red", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 2000 },
-                    { name: "Нож | Стилет | Гамма-волны", rarity: "gold", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 7000 }
-                ]
-            },
-            spectrum: {
-                name: "Spectrum Case",
-                price: 349,
-                image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA",
-                items: [
-                    { name: "FAMAS | Пульс", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhz3MzbcDNG09GzkImemrmlYumGwW0H65Z337uQpNTw3wLi_RE_ZG-lLYWWI1VrMlDY-la2yL_om9bi609Wg2uD/62fx62fdpx2x", price: 80 },
-                    { name: "Galil AR | Холодный камуфляж", rarity: "blue", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17P7NdDBA7cyzl4S0h_TmJ4Tdn2xZ_Pp9i_vG8Y3nj1ak_kZpY2j3I9KSdQ9sYw6D-lLqyO_rhcK7vZ6Yz3Ux6SQj4SnDn0a2mUtLTw", price: 105 },
-                    { name: "Five-SeveN | Обезьяний бизнес", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09Svq5KOk-P9NL7DqWdY781lxO-Z9Nul2wLm-UNuNTr3dtWXdAFvYg2F_Ae2wrq9gpXquszLmHQ36yM8pSGKO4Vc8KU/360fx360f", price: 350 },
-                    { name: "M4A4 | Зевс-ксанаду", rarity: "purple", image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA/360fx360f", price: 450 },
-                    { name: "AWP | Фаст лейн", rarity: "pink", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 1200 },
-                    { name: "AK-47 | Огненный змей", rarity: "red", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 2500 },
-                    { name: "Нож | Керамбит | Лоре", rarity: "gold", image: "https://steamcommunity-a.akamaihd.net/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjxszJemkV09-5lpS0mvLwOq7c2G5U7fpOh9bN8J7yjRrsrRdsMDqmJ4eXJlA2Y1DS_FO_x-zv0cO-t8jJm3UyvnIl4XzD30u0mlJDPA", price: 8000 }
-                ]
+        // Simple modal functionality
+        document.querySelectorAll('.case-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.getElementById('caseModal').style.display = 'flex';
+            });
+        });
+        
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            document.getElementById('caseModal').style.display = 'none';
+        });
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('caseModal')) {
+                document.getElementById('caseModal').style.display = 'none';
             }
-        };
-        
-        // Game state
-        let balance = 1000;
-        let inventory = [];
-        let history = [];
-        let selectedCase = null;
-        let totalOpened = 0;
-        let totalSpent = 0;
-        let totalEarned = 0;
-        let bestItem = null;
-        
-        // DOM elements
-        const userBalanceEl = document.getElementById('userBalance');
-        const caseDisplay = document.getElementById('caseDisplay');
-        const openBtn = document.getElementById('openBtn');
-        const resultDiv = document.getElementById('result');
-        const wonItemDiv = document.getElementById('wonItem');
-        const inventoryItemsEl = document.getElementById('inventoryItems');
-        const historyItemsEl = document.getElementById('historyItems');
-        const totalOpenedEl = document.getElementById('totalOpened');
-        const totalSpentEl = document.getElementById('totalSpent');
-        const totalEarnedEl = document.getElementById('totalEarned');
-        const bestItemEl = document.getElementById('bestItem');
-        
-        // Initialize the game
-        function init() {
-            updateBalance();
-            setupEventListeners();
-            renderInventory();
-            renderStats();
-        }
-        
-        // Setup event listeners
-        function setupEventListeners() {
-            // Case selection
-            document.querySelectorAll('.case').forEach(caseEl => {
-                caseEl.addEventListener('click', function() {
-                    selectedCase = this.getAttribute('data-case');
-                    caseDisplay.style.backgroundImage = `url('${cases[selectedCase].image}')`;
-                    caseDisplay.textContent = cases[selectedCase].name;
-                    openBtn.textContent = `ОТКРЫТЬ КЕЙС (₽${cases[selectedCase].price})`;
-                    openBtn.disabled = balance < cases[selectedCase].price;
-                });
-            });
-            
-            // Open case button
-            openBtn.addEventListener('click', openCase);
-        }
-        
-        // Open case function
-        function openCase() {
-            if (!selectedCase || balance < cases[selectedCase].price) return;
-            
-            // Deduct balance
-            balance -= cases[selectedCase].price;
-            totalSpent += cases[selectedCase].price;
-            updateBalance();
-            
-            // Disable button during opening
-            openBtn.disabled = true;
-            openBtn.textContent = "ОТКРЫВАЕТСЯ...";
-            
-            // Show spinning animation
-            caseDisplay.classList.add('spinning');
-            caseDisplay.textContent = "";
-            
-            // Hide previous result
-            resultDiv.style.display = "none";
-            
-            // Simulate case opening delay
-            setTimeout(() => {
-                // Get random item (with rarity weights)
-                const random = Math.random();
-                let itemIndex;
-                
-                if (random < 0.5) {
-                    itemIndex = 0; // 50% blue
-                } else if (random < 0.8) {
-                    itemIndex = 1; // 30% blue
-                } else if (random < 0.9) {
-                    itemIndex = 2; // 10% purple
-                } else if (random < 0.95) {
-                    itemIndex = 3; // 5% purple
-                } else if (random < 0.98) {
-                    itemIndex = 4; // 3% pink
-                } else if (random < 0.995) {
-                    itemIndex = 5; // 1.5% red
-                } else {
-                    itemIndex = 6; // 0.5% gold (knife)
-                }
-                
-                const wonItem = cases[selectedCase].items[itemIndex];
-                
-                // Add to inventory
-                inventory.push(wonItem);
-                
-                // Add to history
-                const now = new Date();
-                const timeString = now.toLocaleTimeString();
-                history.unshift({
-                    item: wonItem,
-                    case: cases[selectedCase].name,
-                    time: timeString
-                });
-                
-                // Update stats
-                totalOpened++;
-                totalEarned += wonItem.price;
-                if (!bestItem || wonItem.price > bestItem.price) {
-                    bestItem = wonItem;
-                }
-                
-                // Show result
-                showResult(wonItem);
-                
-                // Update UI
-                renderInventory();
-                renderHistory();
-                renderStats();
-                
-                // Reset case display
-                caseDisplay.classList.remove('spinning');
-                caseDisplay.style.backgroundImage = `url('${cases[selectedCase].image}')`;
-                caseDisplay.textContent = cases[selectedCase].name;
-                
-                // Re-enable button if enough balance
-                openBtn.disabled = balance < cases[selectedCase].price;
-                openBtn.textContent = `ОТКРЫТЬ КЕЙС (₽${cases[selectedCase].price})`;
-            }, 2000);
-        }
-        
-        // Show won item
-        function showResult(item) {
-            wonItemDiv.innerHTML = `
-                <div class="item ${item.rarity}">
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-rarity">★ ${getRarityName(item.rarity)} ★</div>
-                    <div class="item-price">Цена: ₽${item.price}</div>
-                </div>
-            `;
-            resultDiv.style.display = "block";
-        }
-        
-        // Get rarity name in Russian
-        function getRarityName(rarity) {
-            const names = {
-                blue: "Промышленное качество",
-                purple: "Армейское качество",
-                pink: "Запрещенное качество",
-                red: "Тайное качество",
-                gold: "Тайное качество"
-            };
-            return names[rarity] || rarity;
-        }
-        
-        // Render inventory
-        function renderInventory() {
-            inventoryItemsEl.innerHTML = "";
-            
-            if (inventory.length === 0) {
-                inventoryItemsEl.innerHTML = "<p>Ваш инвентарь пуст</p>";
-                return;
-            }
-            
-            inventory.forEach((item, index) => {
-                const itemEl = document.createElement('div');
-                itemEl.className = 'inventory-item';
-                itemEl.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}">
-                    <div class="inventory-item-name">${item.name}</div>
-                    <div class="inventory-item-price">₽${item.price}</div>
-                    <button class="sell-btn" data-index="${index}">Продать</button>
-                `;
-                inventoryItemsEl.appendChild(itemEl);
-            });
-            
-            // Add sell event listeners
-            document.querySelectorAll('.sell-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    sellItem(index);
-                });
-            });
-        }
-        
-        // Sell item
-        function sellItem(index) {
-            const item = inventory[index];
-            balance += item.price;
-            inventory.splice(index, 1);
-            
-            updateBalance();
-            renderInventory();
-        }
-        
-        // Render history
-        function renderHistory() {
-            historyItemsEl.innerHTML = "";
-            
-            if (history.length === 0) {
-                historyItemsEl.innerHTML = "<p>История открытий пуста</p>";
-                return;
-            }
-            
-            history.forEach(entry => {
-                const entryEl = document.createElement('div');
-                entryEl.className = 'history-item';
-                entryEl.innerHTML = `
-                    ${entry.item.name} (${entry.case}) <span>₽${entry.item.price}</span>
-                `;
-                historyItemsEl.appendChild(entryEl);
-            });
-        }
-        
-        // Render stats
-        function renderStats() {
-            totalOpenedEl.textContent = totalOpened;
-            totalSpentEl.textContent = totalSpent;
-            totalEarnedEl.textContent = totalEarned;
-            bestItemEl.textContent = bestItem ? `₽${bestItem.price}` : "-";
-        }
-        
-        // Update balance display
-        function updateBalance() {
-            userBalanceEl.textContent = balance;
-        }
-        
-        // Initialize the game when page loads
-        window.addEventListener('load', init);
+        });
     </script>
 </body>
 </html>
