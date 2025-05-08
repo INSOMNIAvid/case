@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Case Battle</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #6C5DD3;
@@ -12,11 +13,13 @@
             --secondary: #FF754C;
             --dark: #1F2128;
             --dark-2: #242731;
+            --dark-3: #2A2D3A;
             --gray: #E4E4E4;
             --light: #F5F5F5;
             --white: #FFFFFF;
             --green: #7FBA7A;
             --red: #FF754C;
+            --yellow: #FFCE73;
         }
         
         * {
@@ -29,6 +32,7 @@
         body {
             background-color: var(--dark);
             color: var(--white);
+            overflow-x: hidden;
         }
         
         .container {
@@ -40,6 +44,10 @@
         header {
             padding: 20px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            background-color: var(--dark);
+            z-index: 100;
         }
         
         .header-content {
@@ -52,10 +60,17 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--white);
+            display: flex;
+            align-items: center;
         }
         
         .logo span {
             color: var(--primary);
+        }
+        
+        .logo img {
+            height: 30px;
+            margin-right: 10px;
         }
         
         nav ul {
@@ -65,6 +80,7 @@
         
         nav ul li {
             margin-left: 30px;
+            position: relative;
         }
         
         nav ul li a {
@@ -72,10 +88,31 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        nav ul li a i {
+            margin-right: 8px;
+            font-size: 16px;
         }
         
         nav ul li a:hover {
             color: var(--primary);
+        }
+        
+        nav ul li.active a {
+            color: var(--primary);
+        }
+        
+        nav ul li.active::after {
+            content: '';
+            position: absolute;
+            bottom: -22px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
         }
         
         .user-actions {
@@ -89,6 +126,13 @@
             border-radius: 12px;
             margin-right: 20px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .balance i {
+            margin-right: 8px;
+            color: var(--yellow);
         }
         
         .balance span {
@@ -102,6 +146,13 @@
             cursor: pointer;
             border: none;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn i {
+            margin-right: 8px;
         }
         
         .btn-primary {
@@ -111,6 +162,7 @@
         
         .btn-primary:hover {
             background-color: var(--primary-dark);
+            transform: translateY(-2px);
         }
         
         .btn-outline {
@@ -122,6 +174,27 @@
         .btn-outline:hover {
             background-color: var(--primary);
             color: var(--white);
+            transform: translateY(-2px);
+        }
+        
+        .btn-green {
+            background-color: var(--green);
+            color: var(--white);
+        }
+        
+        .btn-green:hover {
+            background-color: #6da768;
+            transform: translateY(-2px);
+        }
+        
+        .btn-red {
+            background-color: var(--red);
+            color: var(--white);
+        }
+        
+        .btn-red:hover {
+            background-color: #e66a43;
+            transform: translateY(-2px);
         }
         
         main {
@@ -132,6 +205,40 @@
             font-size: 28px;
             margin-bottom: 30px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 12px;
+            color: var(--primary);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
         }
         
         .battles-grid {
@@ -145,11 +252,24 @@
             background-color: var(--dark-2);
             border-radius: 16px;
             padding: 20px;
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .battle-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
         
         .battle-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
         
         .battle-card-header {
@@ -180,6 +300,7 @@
         
         .participant {
             text-align: center;
+            position: relative;
         }
         
         .participant-avatar {
@@ -189,6 +310,14 @@
             background-color: var(--dark);
             margin-bottom: 8px;
             overflow: hidden;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .participant-winner .participant-avatar {
+            border-color: var(--yellow);
+            box-shadow: 0 0 15px var(--yellow);
         }
         
         .participant-avatar img {
@@ -200,6 +329,20 @@
         .participant-name {
             font-size: 14px;
             color: var(--gray);
+        }
+        
+        .participant-value {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-3);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--yellow);
+            border: 1px solid rgba(255, 206, 115, 0.3);
         }
         
         .vs {
@@ -216,6 +359,14 @@
             text-align: center;
             margin-bottom: 15px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .battle-card-timer i {
+            margin-right: 8px;
+            color: var(--secondary);
         }
         
         .battle-card-footer {
@@ -242,11 +393,25 @@
             border-radius: 12px;
             padding: 15px;
             text-align: center;
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
         
         .case-card:hover {
             transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
         
         .case-image {
@@ -261,6 +426,11 @@
         .case-image img {
             max-width: 100%;
             max-height: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .case-card:hover .case-image img {
+            transform: scale(1.1);
         }
         
         .case-name {
@@ -284,6 +454,12 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         .modal-content {
@@ -293,6 +469,18 @@
             max-width: 500px;
             padding: 30px;
             position: relative;
+            animation: slideUp 0.4s;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .close-modal {
@@ -302,6 +490,11 @@
             font-size: 24px;
             cursor: pointer;
             color: var(--gray);
+            transition: color 0.3s;
+        }
+        
+        .close-modal:hover {
+            color: var(--white);
         }
         
         .modal-title {
@@ -324,6 +517,13 @@
         .case-preview img {
             max-width: 100%;
             max-height: 100%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         
         .open-case-btn {
@@ -331,6 +531,131 @@
             padding: 15px;
             font-size: 16px;
             margin-top: 20px;
+        }
+        
+        .recent-wins {
+            margin-top: 40px;
+        }
+        
+        .wins-container {
+            background-color: var(--dark-2);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        .wins-list {
+            display: flex;
+            gap: 15px;
+            min-width: max-content;
+        }
+        
+        .win-item {
+            background-color: var(--dark-3);
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .win-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .win-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+        }
+        
+        .win-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .win-details {
+            flex: 1;
+        }
+        
+        .win-user {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .win-item-name {
+            color: var(--yellow);
+            font-size: 14px;
+        }
+        
+        .win-value {
+            font-weight: 700;
+            color: var(--green);
+        }
+        
+        .create-battle {
+            margin-top: 40px;
+            background-color: var(--dark-2);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .create-battle-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .create-options {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .create-option {
+            background-color: var(--dark-3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .create-option:hover {
+            border-color: var(--primary);
+        }
+        
+        .create-option.active {
+            border-color: var(--primary);
+            background-color: rgba(108, 93, 211, 0.1);
+        }
+        
+        .create-option i {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .create-option-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .create-option-desc {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .create-battle-btn {
+            width: 200px;
+            margin: 0 auto;
         }
         
         @media (max-width: 768px) {
@@ -341,20 +666,31 @@
             
             nav ul {
                 margin: 20px 0;
+                flex-wrap: wrap;
             }
             
             nav ul li {
                 margin-left: 15px;
                 margin-right: 15px;
+                margin-bottom: 10px;
+            }
+            
+            nav ul li.active::after {
+                bottom: -10px;
             }
             
             .user-actions {
                 width: 100%;
                 justify-content: space-between;
+                margin-top: 15px;
             }
             
             .battles-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .create-options {
+                flex-direction: column;
             }
         }
     </style>
@@ -363,19 +699,25 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">Case<span>Battle</span></div>
+                <div class="logo">
+                    <img src="https://via.placeholder.com/30x30" alt="Logo">
+                    Case<span>Battle</span>
+                </div>
                 <nav>
                     <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">Battles</a></li>
-                        <li><a href="#">Cases</a></li>
-                        <li><a href="#">Top</a></li>
-                        <li><a href="#">FAQ</a></li>
+                        <li class="active"><a href="#"><i class="fas fa-home"></i>Home</a></li>
+                        <li><a href="#"><i class="fas fa-trophy"></i>Battles</a></li>
+                        <li><a href="#"><i class="fas fa-box-open"></i>Cases</a></li>
+                        <li><a href="#"><i class="fas fa-crown"></i>Top</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i>FAQ</a></li>
                     </ul>
                 </nav>
                 <div class="user-actions">
-                    <div class="balance">Balance: <span>$0.00</span></div>
-                    <button class="btn btn-outline">Deposit</button>
+                    <div class="balance">
+                        <i class="fas fa-coins"></i>
+                        Balance: <span>$0.00</span>
+                    </div>
+                    <button class="btn btn-outline"><i class="fas fa-wallet"></i>Deposit</button>
                 </div>
             </div>
         </div>
@@ -384,7 +726,15 @@
     <main>
         <div class="container">
             <section>
-                <h2 class="section-title">Active Battles</h2>
+                <h2 class="section-title"><i class="fas fa-bolt"></i>Active Battles</h2>
+                
+                <div class="tabs">
+                    <div class="tab active">All Battles</div>
+                    <div class="tab">2 Players</div>
+                    <div class="tab">5 Players</div>
+                    <div class="tab">10 Players</div>
+                </div>
+                
                 <div class="battles-grid">
                     <div class="battle-card">
                         <div class="battle-card-header">
@@ -392,11 +742,12 @@
                             <div class="battle-card-price">$10</div>
                         </div>
                         <div class="battle-card-participants">
-                            <div class="participant">
+                            <div class="participant participant-winner">
                                 <div class="participant-avatar">
                                     <img src="https://via.placeholder.com/60" alt="Player">
                                 </div>
                                 <div class="participant-name">Player1</div>
+                                <div class="participant-value">$47.50</div>
                             </div>
                             <div class="vs">VS</div>
                             <div class="participant">
@@ -406,10 +757,10 @@
                                 <div class="participant-name">Waiting...</div>
                             </div>
                         </div>
-                        <div class="battle-card-timer">00:32 left</div>
+                        <div class="battle-card-timer"><i class="fas fa-clock"></i>00:32 left</div>
                         <div class="battle-card-footer">
-                            <button class="btn btn-primary battle-card-btn">Join</button>
-                            <button class="btn btn-outline battle-card-btn">View</button>
+                            <button class="btn btn-primary battle-card-btn"><i class="fas fa-user-plus"></i>Join</button>
+                            <button class="btn btn-outline battle-card-btn"><i class="fas fa-eye"></i>View</button>
                         </div>
                     </div>
                     
@@ -424,24 +775,26 @@
                                     <img src="https://via.placeholder.com/60" alt="Player">
                                 </div>
                                 <div class="participant-name">Player2</div>
+                                <div class="participant-value">$12.30</div>
                             </div>
                             <div class="participant">
                                 <div class="participant-avatar">
                                     <img src="https://via.placeholder.com/60" alt="Player">
                                 </div>
                                 <div class="participant-name">Player3</div>
+                                <div class="participant-value">$8.75</div>
                             </div>
                             <div class="participant">
                                 <div class="participant-avatar">
-                                    <div style="background-color: #6C5DD3; display: flex; align-items: center; justify-content: center; color: white;">?</div>
+                                    <div style="background-color: #6C5DD3; display: flex; align-items: center; justify-content: center; color: white;">+3</div>
                                 </div>
-                                <div class="participant-name">Waiting...</div>
+                                <div class="participant-name">3 players</div>
                             </div>
                         </div>
-                        <div class="battle-card-timer">01:45 left</div>
+                        <div class="battle-card-timer"><i class="fas fa-clock"></i>01:45 left</div>
                         <div class="battle-card-footer">
-                            <button class="btn btn-primary battle-card-btn">Join</button>
-                            <button class="btn btn-outline battle-card-btn">View</button>
+                            <button class="btn btn-primary battle-card-btn"><i class="fas fa-user-plus"></i>Join</button>
+                            <button class="btn btn-outline battle-card-btn"><i class="fas fa-eye"></i>View</button>
                         </div>
                     </div>
                     
@@ -456,12 +809,14 @@
                                     <img src="https://via.placeholder.com/60" alt="Player">
                                 </div>
                                 <div class="participant-name">Player4</div>
+                                <div class="participant-value">$65.20</div>
                             </div>
                             <div class="participant">
                                 <div class="participant-avatar">
                                     <img src="https://via.placeholder.com/60" alt="Player">
                                 </div>
                                 <div class="participant-name">Player5</div>
+                                <div class="participant-value">$42.80</div>
                             </div>
                             <div class="participant">
                                 <div class="participant-avatar">
@@ -470,17 +825,75 @@
                                 <div class="participant-name">5 players</div>
                             </div>
                         </div>
-                        <div class="battle-card-timer">03:12 left</div>
+                        <div class="battle-card-timer"><i class="fas fa-clock"></i>03:12 left</div>
                         <div class="battle-card-footer">
-                            <button class="btn btn-primary battle-card-btn">Join</button>
-                            <button class="btn btn-outline battle-card-btn">View</button>
+                            <button class="btn btn-primary battle-card-btn"><i class="fas fa-user-plus"></i>Join</button>
+                            <button class="btn btn-outline battle-card-btn"><i class="fas fa-eye"></i>View</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="recent-wins">
+                <h2 class="section-title"><i class="fas fa-medal"></i>Recent Wins</h2>
+                <div class="wins-container">
+                    <div class="wins-list">
+                        <div class="win-item">
+                            <div class="win-avatar">
+                                <img src="https://via.placeholder.com/40" alt="User">
+                            </div>
+                            <div class="win-details">
+                                <div class="win-user">User123</div>
+                                <div class="win-item-name">Dragon Lore</div>
+                            </div>
+                            <div class="win-value">$1250</div>
+                        </div>
+                        <div class="win-item">
+                            <div class="win-avatar">
+                                <img src="https://via.placeholder.com/40" alt="User">
+                            </div>
+                            <div class="win-details">
+                                <div class="win-user">ProGamer</div>
+                                <div class="win-item-name">AWP | Fade</div>
+                            </div>
+                            <div class="win-value">$850</div>
+                        </div>
+                        <div class="win-item">
+                            <div class="win-avatar">
+                                <img src="https://via.placeholder.com/40" alt="User">
+                            </div>
+                            <div class="win-details">
+                                <div class="win-user">LuckyOne</div>
+                                <div class="win-item-name">Karambit | Crimson Web</div>
+                            </div>
+                            <div class="win-value">$720</div>
+                        </div>
+                        <div class="win-item">
+                            <div class="win-avatar">
+                                <img src="https://via.placeholder.com/40" alt="User">
+                            </div>
+                            <div class="win-details">
+                                <div class="win-user">Battler</div>
+                                <div class="win-item-name">M9 Bayonet | Doppler</div>
+                            </div>
+                            <div class="win-value">$680</div>
+                        </div>
+                        <div class="win-item">
+                            <div class="win-avatar">
+                                <img src="https://via.placeholder.com/40" alt="User">
+                            </div>
+                            <div class="win-details">
+                                <div class="win-user">WinnerX</div>
+                                <div class="win-item-name">Butterfly Knife | Fade</div>
+                            </div>
+                            <div class="win-value">$1100</div>
                         </div>
                     </div>
                 </div>
             </section>
             
             <section class="cases-section">
-                <h2 class="section-title">Popular Cases</h2>
+                <h2 class="section-title"><i class="fas fa-box-open"></i>Popular Cases</h2>
                 <div class="cases-grid">
                     <div class="case-card">
                         <div class="case-image">
@@ -523,6 +936,28 @@
                     </div>
                 </div>
             </section>
+            
+            <section class="create-battle">
+                <h3 class="create-battle-title">Create Your Own Battle</h3>
+                <div class="create-options">
+                    <div class="create-option active">
+                        <i class="fas fa-users"></i>
+                        <div class="create-option-name">2 Players</div>
+                        <div class="create-option-desc">$10 entry</div>
+                    </div>
+                    <div class="create-option">
+                        <i class="fas fa-users"></i>
+                        <div class="create-option-name">5 Players</div>
+                        <div class="create-option-desc">$25 entry</div>
+                    </div>
+                    <div class="create-option">
+                        <i class="fas fa-users"></i>
+                        <div class="create-option-name">10 Players</div>
+                        <div class="create-option-desc">$100 entry</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary create-battle-btn"><i class="fas fa-plus-circle"></i>Create Battle</button>
+            </section>
         </div>
     </main>
     
@@ -535,29 +970,114 @@
                     <img src="https://via.placeholder.com/200x150" alt="Dragon Case">
                 </div>
                 <p>Contains high-value items with Dragon theme</p>
-                <button class="btn btn-primary open-case-btn">Open Case ($5.00)</button>
+                <div style="margin: 20px 0; padding: 15px; background-color: var(--dark-3); border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span>Price:</span>
+                        <span style="color: var(--primary); font-weight: 600;">$5.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Items in case:</span>
+                        <span style="font-weight: 600;">50+</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary open-case-btn"><i class="fas fa-box-open"></i>Open Case ($5.00)</button>
             </div>
         </div>
     </div>
     
     <script>
-        // Simple modal functionality
+        // Modal functionality
         document.querySelectorAll('.case-card').forEach(card => {
             card.addEventListener('click', () => {
-                document.getElementById('caseModal').style.display = 'flex';
+                const caseName = card.querySelector('.case-name').textContent;
+                const casePrice = card.querySelector('.case-price').textContent;
+                const modal = document.getElementById('caseModal');
+                
+                modal.querySelector('.modal-title').textContent = caseName;
+                modal.querySelector('.open-case-btn').innerHTML = 
+                    `<i class="fas fa-box-open"></i>Open Case (${casePrice})`;
+                
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
             });
         });
         
-        document.querySelector('.close-modal').addEventListener('click', () => {
+        document.querySelector('.close-modal').addEventListener('click', closeModal);
+        
+        function closeModal() {
             document.getElementById('caseModal').style.display = 'none';
-        });
+            document.body.style.overflow = 'auto';
+        }
         
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
             if (e.target === document.getElementById('caseModal')) {
-                document.getElementById('caseModal').style.display = 'none';
+                closeModal();
             }
         });
+        
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelector('.tab.active').classList.remove('active');
+                tab.classList.add('active');
+            });
+        });
+        
+        // Create battle options
+        document.querySelectorAll('.create-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelector('.create-option.active').classList.remove('active');
+                option.classList.add('active');
+            });
+        });
+        
+        // Simulate battle timers
+        function updateTimers() {
+            const timers = document.querySelectorAll('.battle-card-timer');
+            
+            timers.forEach(timer => {
+                const timeText = timer.textContent.split(' ')[1];
+                let [minutes, seconds] = timeText.split(':').map(Number);
+                
+                seconds--;
+                if (seconds < 0) {
+                    seconds = 59;
+                    minutes--;
+                }
+                
+                if (minutes < 0) {
+                    // Timer expired, you would typically refresh the battle list here
+                    minutes = 0;
+                    seconds = 0;
+                }
+                
+                const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timer.innerHTML = `<i class="fas fa-clock"></i>${formattedTime} left`;
+            });
+        }
+        
+        setInterval(updateTimers, 1000);
+        
+        // Animate wins list
+        const winsList = document.querySelector('.wins-list');
+        let scrollAmount = 0;
+        const scrollSpeed = 1;
+        
+        function animateWinsList() {
+            scrollAmount += scrollSpeed;
+            if (scrollAmount >= winsList.scrollWidth / 2) {
+                scrollAmount = 0;
+            }
+            winsList.style.transform = `translateX(-${scrollAmount}px)`;
+            requestAnimationFrame(animateWinsList);
+        }
+        
+        // Only animate if list overflows
+        if (winsList.scrollWidth > winsList.parentElement.offsetWidth) {
+            winsList.innerHTML += winsList.innerHTML; // Duplicate items for seamless looping
+            animateWinsList();
+        }
     </script>
 </body>
 </html>
