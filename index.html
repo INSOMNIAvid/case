@@ -8,6 +8,7 @@
             margin: 0; 
             overflow: hidden; 
             background-color: #000;
+            font-family: Arial, sans-serif;
         }
         canvas { 
             display: block; 
@@ -18,9 +19,9 @@
             width: 100%;
             text-align: center;
             color: white;
-            font-family: Arial, sans-serif;
             pointer-events: none;
             text-shadow: 0 0 5px #000;
+            font-size: 18px;
         }
         #loading {
             position: absolute;
@@ -28,169 +29,396 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-family: Arial, sans-serif;
             font-size: 24px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+        }
+        #speed-control {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #666;
         }
     </style>
 </head>
 <body>
-    <div id="info">Реалистичная 3D Солнечная система<br>Используйте мышь для навигации, колесо для масштабирования</div>
-    <div id="loading">Загрузка текстур...</div>
+    <div id="info">Реалистичная 3D Солнечная система<br>Нажмите на экран для управления</div>
+    <div id="loading">Загрузка текстур и моделей...</div>
+    <div id="controls">
+        <div class="control-group">
+            <div><strong>Управление движением:</strong></div>
+            <div>WASD - перемещение</div>
+            <div>Пробел/Shift - вверх/вниз</div>
+            <div>Мышь - осмотр</div>
+        </div>
+        <div class="control-group">
+            <div><strong>Скорость перемещения:</strong></div>
+            <input type="range" id="speed-control" min="1" max="100" value="20">
+            <div id="speed-value">Скорость: 20</div>
+        </div>
+        <div class="control-group">
+            <div><strong>Позиция камеры:</strong></div>
+            <div id="position">X: 0, Y: 0, Z: 0</div>
+        </div>
+        <div class="control-group">
+            <div><strong>Быстрые переходы:</strong></div>
+            <button id="btn-sun">Солнце</button>
+            <button id="btn-earth">Земля</button>
+            <button id="btn-jupiter">Юпитер</button>
+            <button id="btn-saturn">Сатурн</button>
+            <button id="btn-pluto">Плутон</button>
+        </div>
+    </div>
     
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/PointerLockControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/TextureLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/effects/LensFlare.js"></script>
 
     <script>
         // Инициализация сцены, камеры и рендерера
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000000);
+        const renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            logarithmicDepthBuffer: true
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Добавление управления камерой
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.minDistance = 5;
-        controls.maxDistance = 3000;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.5;
+        // Переменные для управления
+        const moveSpeed = { current: 20, target: 20 };
+        const moveDirection = {
+            forward: false,
+            backward: false,
+            left: false,
+            right: false,
+            up: false,
+            down: false
+        };
 
-        // Позиция камеры
-        camera.position.set(0, 150, 300);
-
-        // Загрузчик текстур
-        const textureLoader = new THREE.TextureLoader();
+        // Настройка управления с помощью PointerLockControls
+        const controls = new THREE.PointerLockControls(camera, document.body);
         
+        // Обработчики событий для блокировки указателя
+        document.addEventListener('click', function() {
+            if (!controls.isLocked) {
+                controls.lock();
+            }
+        });
+
+        controls.addEventListener('lock', function() {
+            document.getElementById('info').style.display = 'none';
+        });
+
+        controls.addEventListener('unlock', function() {
+            document.getElementById('info').style.display = 'block';
+        });
+
+        // Обработка клавиш клавиатуры
+        const keyStates = {};
+        document.addEventListener('keydown', function(event) {
+            keyStates[event.code] = true;
+            updateMovement();
+        });
+
+        document.addEventListener('keyup', function(event) {
+            keyStates[event.code] = false;
+            updateMovement();
+        });
+
+        function updateMovement() {
+            moveDirection.forward = keyStates['KeyW'] || false;
+            moveDirection.backward = keyStates['KeyS'] || false;
+            moveDirection.left = keyStates['KeyA'] || false;
+            moveDirection.right = keyStates['KeyD'] || false;
+            moveDirection.up = keyStates['Space'] || false;
+            moveDirection.down = keyStates['ShiftLeft'] || false;
+        }
+
+        // Управление скоростью
+        document.addEventListener('wheel', function(event) {
+            moveSpeed.target = Math.max(1, Math.min(100, moveSpeed.target - event.deltaY * 0.01));
+            updateSpeedDisplay();
+        });
+
+        document.getElementById('speed-control').addEventListener('input', function(e) {
+            moveSpeed.target = parseInt(e.target.value);
+            updateSpeedDisplay();
+        });
+
+        function updateSpeedDisplay() {
+            document.getElementById('speed-value').textContent = `Скорость: ${Math.round(moveSpeed.target)}`;
+        }
+
+        // Быстрые переходы
+        document.getElementById('btn-sun').addEventListener('click', () => moveToObject(solarSystem.sun, 100));
+        document.getElementById('btn-earth').addEventListener('click', () => moveToObject(solarSystem.planets[2], 30));
+        document.getElementById('btn-jupiter').addEventListener('click', () => moveToObject(solarSystem.planets[4], 80));
+        document.getElementById('btn-saturn').addEventListener('click', () => moveToObject(solarSystem.planets[5], 100));
+        document.getElementById('btn-pluto').addEventListener('click', () => moveToObject(solarSystem.dwarfPlanets[0], 30));
+
+        function moveToObject(obj, distance) {
+            if (!obj) return;
+            
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            direction.multiplyScalar(-1);
+            
+            const targetPosition = new THREE.Vector3();
+            obj.getWorldPosition(targetPosition);
+            targetPosition.add(direction.multiplyScalar(distance));
+            
+            // Плавное перемещение
+            const duration = 1000; // 1 секунда
+            const startPosition = camera.position.clone();
+            const startTime = Date.now();
+            
+            function animateMove() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                camera.position.lerpVectors(startPosition, targetPosition, progress);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateMove);
+                }
+            }
+            
+            animateMove();
+        }
+
         // Массив для хранения всех объектов
         const solarSystem = {
             sun: null,
             planets: [],
             dwarfPlanets: [],
-            asteroids: []
+            moons: [],
+            asteroidBelts: [],
+            stars: null
         };
 
-        // Функция создания звездного фона
+        // Создание реалистичного звездного фона
         function createStars() {
+            // Основные звезды
             const starsGeometry = new THREE.BufferGeometry();
             const starsMaterial = new THREE.PointsMaterial({
                 color: 0xFFFFFF,
-                size: 0.1,
-                transparent: true
+                size: 0.15,
+                transparent: true,
+                opacity: 1,
+                sizeAttenuation: true
             });
 
             const starsVertices = [];
-            for (let i = 0; i < 30000; i++) {
-                const x = (Math.random() - 0.5) * 4000;
-                const y = (Math.random() - 0.5) * 4000;
-                const z = (Math.random() - 0.5) * 4000;
+            const starsColors = [];
+            
+            // Создаем 3 слоя звезд с разными размерами и яркостью
+            for (let i = 0; i < 20000; i++) {
+                // Случайное положение в сфере
+                const x = (Math.random() - 0.5) * 20000;
+                const y = (Math.random() - 0.5) * 20000;
+                const z = (Math.random() - 0.5) * 20000;
+                
                 starsVertices.push(x, y, z);
+                
+                // Разные цвета звезд
+                const starType = Math.random();
+                let r, g, b;
+                
+                if (starType < 0.7) { // Бело-голубые звезды
+                    r = 0.8 + Math.random() * 0.2;
+                    g = 0.8 + Math.random() * 0.2;
+                    b = 0.9 + Math.random() * 0.1;
+                } else if (starType < 0.9) { // Желтые звезды
+                    r = 0.9 + Math.random() * 0.1;
+                    g = 0.8 + Math.random() * 0.2;
+                    b = 0.5 + Math.random() * 0.2;
+                } else { // Красные звезды
+                    r = 0.9 + Math.random() * 0.1;
+                    g = 0.5 + Math.random() * 0.3;
+                    b = 0.5 + Math.random() * 0.2;
+                }
+                
+                starsColors.push(r, g, b);
             }
 
             starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+            starsGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starsColors, 3));
+            starsMaterial.vertexColors = true;
+            
             const stars = new THREE.Points(starsGeometry, starsMaterial);
             scene.add(stars);
+            solarSystem.stars = stars;
+            
+            // Туманности на заднем фоне
+            const nebulaGeometry = new THREE.SphereGeometry(10000, 32, 32);
+            const nebulaTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/galaxy/purple_nebula.jpg');
+            const nebulaMaterial = new THREE.MeshBasicMaterial({
+                map: nebulaTexture,
+                side: THREE.BackSide,
+                transparent: true,
+                opacity: 0.15,
+                depthWrite: false
+            });
+            const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+            scene.add(nebula);
         }
 
-        // Создание солнца с текстурой и объемным эффектом
+        // Создание объемного Солнца с эффектами
         function createSun() {
-            const sunGeometry = new THREE.SphereGeometry(25, 128, 128);
-            const sunTexture = textureLoader.load('https://threejs.org/examples/textures/planets/sun_surface.jpg');
-            const sunMaterial = new THREE.MeshPhongMaterial({
+            // Основная сфера Солнца
+            const sunGeometry = new THREE.SphereGeometry(70, 128, 128);
+            const sunTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/sun_surface_4k.jpg');
+            const sunMaterial = new THREE.MeshBasicMaterial({
                 map: sunTexture,
-                emissive: 0xffaa33,
-                emissiveIntensity: 1,
-                specular: 0xffffee,
-                shininess: 50,
-                transparent: true,
-                opacity: 0.98
+                color: 0xffff99,
+                transparent: false
             });
             
             const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            sun.name = "Солнце";
             
-            // Добавление свечения
-            const glowGeometry = new THREE.SphereGeometry(28, 64, 64);
-            const glowMaterial = new THREE.MeshBasicMaterial({
-                color: 0xffaa00,
-                transparent: true,
-                opacity: 0.7,
-                side: THREE.BackSide
-            });
-            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-            sun.add(glow);
-            
-            // Солнечная корона
-            const coronaGeometry = new THREE.SphereGeometry(35, 64, 64);
-            const coronaMaterial = new THREE.MeshBasicMaterial({
-                color: 0xff6600,
+            // Внутренняя корона (ближнее свечение)
+            const innerCoronaGeometry = new THREE.SphereGeometry(72, 128, 128);
+            const innerCoronaMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffaa55,
                 transparent: true,
                 opacity: 0.3,
-                side: THREE.BackSide
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
             });
-            const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
-            sun.add(corona);
+            const innerCorona = new THREE.Mesh(innerCoronaGeometry, innerCoronaMaterial);
+            sun.add(innerCorona);
             
-            // Точечный свет от солнца
-            const pointLight = new THREE.PointLight(0xffffff, 2, 2000);
+            // Внешняя корона (дальнее свечение)
+            const outerCoronaGeometry = new THREE.SphereGeometry(80, 128, 128);
+            const outerCoronaMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff6600,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending
+            });
+            const outerCorona = new THREE.Mesh(outerCoronaGeometry, outerCoronaMaterial);
+            sun.add(outerCorona);
+            
+            // Солнечные протуберанцы (объемные выбросы)
+            const prominenceGeometry = new THREE.SphereGeometry(68, 64, 64);
+            const prominenceMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff3333,
+                transparent: true,
+                opacity: 0.4,
+                side: THREE.BackSide,
+                wireframe: true,
+                blending: THREE.AdditiveBlending
+            });
+            const prominences = new THREE.Mesh(prominenceGeometry, prominenceMaterial);
+            prominences.scale.set(1.1, 1.1, 1.3);
+            sun.add(prominences);
+            
+            // Освещение
+            const pointLight = new THREE.PointLight(0xffffff, 2, 10000);
             pointLight.position.set(0, 0, 0);
+            pointLight.decay = 2;
             sun.add(pointLight);
             
-            // Добавляем солнечные вспышки
-            const flareTexture = textureLoader.load('https://threejs.org/examples/textures/lensflare/lensflare0.png');
-            const flare = new THREE.Lensflare();
-            flare.addElement(new THREE.LensflareElement(flareTexture, 100, 0, new THREE.Color(0xffffee)));
-            flare.addElement(new THREE.LensflareElement(flareTexture, 60, 0.6, new THREE.Color(0xffffee)));
-            flare.addElement(new THREE.LensflareElement(flareTexture, 70, 0.7, new THREE.Color(0xffffee)));
-            flare.addElement(new THREE.LensflareElement(flareTexture, 120, 0.9, new THREE.Color(0xffff66)));
-            flare.addElement(new THREE.LensflareElement(flareTexture, 70, 1, new THREE.Color(0xffaa33)));
-            pointLight.add(flare);
+            const directionalLight = new THREE.DirectionalLight(0xffffee, 0.7);
+            directionalLight.position.set(0, 0, 0);
+            sun.add(directionalLight);
+            
+            // Эффект солнечного блика
+            const lensFlare = new THREE.LensFlare();
+            lensFlare.addElement(new THREE.LensFlareElement(sunTexture, 100, 0, new THREE.Color(0xffffff)));
+            lensFlare.position.copy(sun.position);
+            scene.add(lensFlare);
             
             scene.add(sun);
             solarSystem.sun = sun;
             return sun;
         }
 
-        // Создание планеты с текстурами
-        function createPlanet(name, radius, position, rotationSpeed, orbitSpeed, textureUrl, bumpMapUrl, specularMapUrl, hasRing = false, ringColor = 0x888888) {
-            const geometry = new THREE.SphereGeometry(radius, 64, 64);
+        // Создание планеты с улучшенными текстурами
+        function createPlanet(name, radius, distance, rotationSpeed, orbitSpeed, textureUrl, bumpMapUrl, specularMapUrl, hasRing = false, ringColor = 0x888888, ringInnerRadius = 1.5, ringOuterRadius = 2.2) {
+            const geometry = new THREE.SphereGeometry(radius, 128, 128);
             
             const textures = {
-                map: textureLoader.load(textureUrl),
-                bumpMap: bumpMapUrl ? textureLoader.load(bumpMapUrl) : null,
-                bumpScale: bumpMapUrl ? 0.05 : 0,
-                specularMap: specularMapUrl ? textureLoader.load(specularMapUrl) : null,
-                specular: new THREE.Color(0x111111)
+                map: new THREE.TextureLoader().load(textureUrl),
+                bumpMap: bumpMapUrl ? new THREE.TextureLoader().load(bumpMapUrl) : null,
+                bumpScale: bumpMapUrl ? radius * 0.1 : 0,
+                specularMap: specularMapUrl ? new THREE.TextureLoader().load(specularMapUrl) : null,
+                specular: specularMapUrl ? new THREE.Color(0x222222) : null,
+                shininess: specularMapUrl ? 20 : 0
             };
             
             const material = new THREE.MeshPhongMaterial(textures);
             const planet = new THREE.Mesh(geometry, material);
             planet.name = name;
-            planet.position.set(position.x, position.y, position.z);
+            planet.position.set(distance, 0, 0);
             
-            // Добавление кольца (если есть)
+            // Добавление атмосферы
+            if (name === "Земля" || name === "Венера" || name === "Титан") {
+                const atmosphereGeometry = new THREE.SphereGeometry(radius * 1.05, 128, 128);
+                const atmosphereMaterial = new THREE.MeshPhongMaterial({
+                    color: name === "Земля" ? 0x5599ff : name === "Венера" ? 0xffccaa : 0xaaaacc,
+                    transparent: true,
+                    opacity: 0.25,
+                    side: THREE.BackSide,
+                    blending: THREE.AdditiveBlending
+                });
+                const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+                planet.add(atmosphere);
+            }
+            
+            // Добавление кольца
             if (hasRing) {
-                const ringGeometry = new THREE.RingGeometry(radius * 1.5, radius * 2.2, 64);
+                const ringGeometry = new THREE.RingGeometry(radius * ringInnerRadius, radius * ringOuterRadius, 128);
+                const ringTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/saturn_ring_alpha.png');
                 const ringMaterial = new THREE.MeshPhongMaterial({
+                    map: ringTexture,
                     color: ringColor,
                     side: THREE.DoubleSide,
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.9,
+                    specular: 0x111111,
+                    shininess: 10,
+                    alphaMap: ringTexture
                 });
                 const ring = new THREE.Mesh(ringGeometry, ringMaterial);
                 ring.rotation.x = Math.PI / 2;
                 planet.add(ring);
             }
             
-            // Сохраняем параметры для анимации
             planet.userData = {
                 rotationSpeed: rotationSpeed,
                 orbitSpeed: orbitSpeed,
-                initialPosition: { ...position },
-                orbitRadius: Math.sqrt(position.x * position.x + position.z * position.z)
+                distance: distance,
+                description: getPlanetDescription(name)
             };
             
             scene.add(planet);
@@ -199,43 +427,59 @@
         }
 
         // Создание карликовой планеты
-        function createDwarfPlanet(name, radius, position, rotationSpeed, orbitSpeed, textureUrl) {
-            const geometry = new THREE.SphereGeometry(radius, 32, 32);
-            const texture = textureLoader.load(textureUrl);
-            const material = new THREE.MeshPhongMaterial({
-                map: texture,
-                specular: new THREE.Color(0x111111)
-            });
-            
-            const planet = new THREE.Mesh(geometry, material);
-            planet.name = name;
-            planet.position.set(position.x, position.y, position.z);
-            
-            // Сохраняем параметры для анимации
-            planet.userData = {
-                rotationSpeed: rotationSpeed,
-                orbitSpeed: orbitSpeed,
-                initialPosition: { ...position },
-                orbitRadius: Math.sqrt(position.x * position.x + position.z * position.z)
-            };
-            
-            scene.add(planet);
+        function createDwarfPlanet(name, radius, distance, rotationSpeed, orbitSpeed, textureUrl, bumpMapUrl) {
+            const planet = createPlanet(name, radius, distance, rotationSpeed, orbitSpeed, textureUrl, bumpMapUrl);
             solarSystem.dwarfPlanets.push(planet);
             return planet;
         }
 
-        // Создание астероидного пояса
-        function createAsteroidBelt(count, innerRadius, outerRadius) {
-            const asteroidGeometry = new THREE.SphereGeometry(0.5, 8, 8);
-            const asteroidMaterial = new THREE.MeshPhongMaterial({
-                color: 0xaaaaaa,
+        // Создание луны
+        function createMoon(name, radius, distance, rotationSpeed, orbitSpeed, parentPlanet, textureUrl, bumpMapUrl) {
+            const geometry = new THREE.SphereGeometry(radius, 64, 64);
+            const texture = new THREE.TextureLoader().load(textureUrl);
+            const bumpMap = bumpMapUrl ? new THREE.TextureLoader().load(bumpMapUrl) : null;
+            
+            const material = new THREE.MeshPhongMaterial({
+                map: texture,
+                bumpMap: bumpMap,
+                bumpScale: bumpMap ? radius * 0.05 : 0,
+                specular: 0x111111,
                 shininess: 10
             });
             
+            const moon = new THREE.Mesh(geometry, material);
+            moon.name = name;
+            moon.position.set(distance, 0, 0);
+            
+            moon.userData = {
+                rotationSpeed: rotationSpeed,
+                orbitSpeed: orbitSpeed,
+                distance: distance,
+                parentPlanet: parentPlanet,
+                description: getPlanetDescription(name)
+            };
+            
+            scene.add(moon);
+            solarSystem.moons.push(moon);
+            return moon;
+        }
+
+        // Создание пояса астероидов
+        function createAsteroidBelt(name, count, innerRadius, outerRadius) {
+            const asteroids = [];
+            const geometry = new THREE.SphereGeometry(0.4, 8, 8);
+            const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/planets/asteroid_4k.jpg');
+            const material = new THREE.MeshPhongMaterial({
+                map: texture,
+                bumpMap: texture,
+                bumpScale: 0.05,
+                specular: 0x111111,
+                shininess: 5
+            });
+            
             for (let i = 0; i < count; i++) {
-                const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+                const asteroid = new THREE.Mesh(geometry, material);
                 
-                // Случайная позиция в поясе
                 const angle = Math.random() * Math.PI * 2;
                 const radius = innerRadius + Math.random() * (outerRadius - innerRadius);
                 const height = (Math.random() - 0.5) * 20;
@@ -244,143 +488,209 @@
                 asteroid.position.z = Math.sin(angle) * radius;
                 asteroid.position.y = height;
                 
-                // Случайный размер и вращение
-                const scale = 0.2 + Math.random() * 1.5;
+                const scale = 0.1 + Math.random() * 0.8;
                 asteroid.scale.set(scale, scale, scale);
                 asteroid.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
                 
-                // Сохраняем параметры для анимации
                 asteroid.userData = {
                     rotationSpeed: (Math.random() - 0.5) * 0.02,
-                    orbitSpeed: (Math.random() * 0.001 + 0.0005) * (Math.random() > 0.5 ? 1 : -1)
+                    orbitSpeed: (Math.random() * 0.001 + 0.0005) * (Math.random() > 0.5 ? 1 : -1),
+                    radius: radius
                 };
                 
                 scene.add(asteroid);
-                solarSystem.asteroids.push(asteroid);
+                asteroids.push(asteroid);
             }
-        }
-
-        // Создание галактики на заднем плане
-        function createGalaxyBackground() {
-            const geometry = new THREE.SphereGeometry(2000, 32, 32);
-            const texture = textureLoader.load('https://threejs.org/examples/textures/galaxy/purple_nebula.jpg');
-            const material = new THREE.MeshBasicMaterial({
-                map: texture,
-                side: THREE.BackSide,
-                transparent: true,
-                opacity: 0.3
+            
+            solarSystem.asteroidBelts.push({
+                name: name,
+                asteroids: asteroids,
+                innerRadius: innerRadius,
+                outerRadius: outerRadius
             });
-            const galaxy = new THREE.Mesh(geometry, material);
-            scene.add(galaxy);
+            
+            return asteroids;
         }
 
-        // Загрузка всех текстур и создание сцены
+        // Описание планет
+        function getPlanetDescription(name) {
+            const descriptions = {
+                "Меркурий": "Ближайшая к Солнцу планета. Температура поверхности от -180°C до 430°C. Нет спутников.",
+                "Венера": "Самая горячая планета (465°C). Атмосфера из углекислого газа с облаками серной кислоты.",
+                "Земля": "Единственная известная планета с жизнью. 71% поверхности покрыто водой.",
+                "Марс": "Красная планета с самой высокой горой (Олимп, 21 км) и крупнейшими пылевыми бурями.",
+                "Юпитер": "Крупнейшая планета. Газовый гигант с 79 спутниками. Большое красное пятно - гигантский шторм.",
+                "Сатурн": "Известен своими кольцами из льда и камней. Имеет 82 подтвержденных спутника.",
+                "Уран": "Ледяной гигант, вращающийся 'на боку' (наклон оси 98°). Имеет 13 колец.",
+                "Нептун": "Самый ветреный мир (скорость ветров до 2100 км/ч). Открыт математически до наблюдений.",
+                "Плутон": "Карликовая планета в поясе Койпера. Имеет 5 спутников, крупнейший - Харон.",
+                "Церера": "Крупнейший объект в поясе астероидов. Единственная карликовая планета во внутренней Солнечной системе.",
+                "Эрида": "Карликовая планета, вызвавшая пересмотр определения планеты. Немного меньше Плутона.",
+                "Хаумеа": "Карликовая планета с вытянутой формой. Совершает оборот за 4 часа.",
+                "Макемаке": "Крупная карликовая планета в поясе Койпера без атмосферы.",
+                "Луна": "Единственный естественный спутник Земли. Оказывает влияние на приливы.",
+                "Титан": "Крупнейший спутник Сатурна. Имеет плотную атмосферу и углеводородные озера.",
+                "Европа": "Спутник Юпитера с подледным океаном, где возможна жизнь."
+            };
+            return descriptions[name] || `${name} - часть нашей Солнечной системы.`;
+        }
+
+        // Инициализация сцены
         function init() {
             createStars();
-            createGalaxyBackground();
             createSun();
             
-            // Создаем планеты с реалистичными текстурами
-            createPlanet(
-                'Меркурий', 4, { x: 40, y: 0, z: 0 }, 0.004, 0.01,
-                'https://threejs.org/examples/textures/planets/mercury_map.jpg',
-                'https://threejs.org/examples/textures/planets/mercury_bump.jpg'
+            // Создаем планеты (расстояния и размеры не в масштабе для удобства просмотра)
+            const mercury = createPlanet(
+                'Меркурий', 5, 80, 0.004, 0.02,
+                'https://threejs.org/examples/textures/planets/mercury_4k.jpg',
+                'https://threejs.org/examples/textures/planets/mercury_bump_4k.jpg'
             );
             
-            createPlanet(
-                'Венера', 6, { x: 70, y: 0, z: 0 }, 0.002, 0.008,
-                'https://threejs.org/examples/textures/planets/venus_surface.jpg',
+            const venus = createPlanet(
+                'Венера', 9, 120, 0.002, 0.015,
+                'https://threejs.org/examples/textures/planets/venus_surface_4k.jpg',
                 null,
-                'https://threejs.org/examples/textures/planets/venus_specular.jpg'
+                'https://threejs.org/examples/textures/planets/venus_specular_4k.jpg'
             );
             
-            createPlanet(
-                'Земля', 6.5, { x: 110, y: 0, z: 0 }, 0.01, 0.006,
-                'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
-                'https://threejs.org/examples/textures/planets/earth_normal_2048.jpg',
-                'https://threejs.org/examples/textures/planets/earth_specular_2048.jpg'
+            const earth = createPlanet(
+                'Земля', 10, 180, 0.01, 0.012,
+                'https://threejs.org/examples/textures/planets/earth_atmos_4k.jpg',
+                'https://threejs.org/examples/textures/planets/earth_normal_4k.jpg',
+                'https://threejs.org/examples/textures/planets/earth_specular_4k.jpg'
             );
             
-            createPlanet(
-                'Марс', 5, { x: 150, y: 0, z: 0 }, 0.008, 0.004,
-                'https://threejs.org/examples/textures/planets/mars_1k_color.jpg',
-                'https://threejs.org/examples/textures/planets/mars_1k_topo.jpg'
+            const mars = createPlanet(
+                'Марс', 8, 240, 0.008, 0.01,
+                'https://threejs.org/examples/textures/planets/mars_4k.jpg',
+                'https://threejs.org/examples/textures/planets/mars_bump_4k.jpg'
             );
             
-            // Пояс астероидов между Марсом и Юпитером
-            createAsteroidBelt(1000, 180, 220);
+            // Главный пояс астероидов
+            createAsteroidBelt('Главный пояс', 2000, 260, 300);
             
-            createPlanet(
-                'Юпитер', 14, { x: 250, y: 0, z: 0 }, 0.02, 0.003,
-                'https://threejs.org/examples/textures/planets/jupiter_2k.jpg'
+            const jupiter = createPlanet(
+                'Юпитер', 20, 400, 0.02, 0.008,
+                'https://threejs.org/examples/textures/planets/jupiter_4k.jpg',
+                'https://threejs.org/examples/textures/planets/jupiter_bump_4k.jpg'
             );
             
-            createPlanet(
-                'Сатурн', 12, { x: 350, y: 0, z: 0 }, 0.015, 0.002,
-                'https://threejs.org/examples/textures/planets/saturn_2k.jpg',
-                null, null, true, 0xddddbb
+            const saturn = createPlanet(
+                'Сатурн', 18, 550, 0.015, 0.006,
+                'https://threejs.org/examples/textures/planets/saturn_4k.jpg',
+                null, null, true, 0xddddbb, 1.5, 2.5
             );
             
-            createPlanet(
-                'Уран', 9, { x: 450, y: 0, z: 0 }, 0.01, 0.0015,
-                'https://threejs.org/examples/textures/planets/uranus_2k.jpg',
-                null, null, true, 0xaaddff
+            const uranus = createPlanet(
+                'Уран', 12, 700, 0.01, 0.004,
+                'https://threejs.org/examples/textures/planets/uranus_4k.jpg',
+                null, null, true, 0xaaddff, 1.3, 1.8
             );
             
-            createPlanet(
-                'Нептун', 9, { x: 520, y: 0, z: 0 }, 0.012, 0.001,
-                'https://threejs.org/examples/textures/planets/neptune_2k.jpg'
+            const neptune = createPlanet(
+                'Нептун', 12, 850, 0.012, 0.003,
+                'https://threejs.org/examples/textures/planets/neptune_4k.jpg',
+                'https://threejs.org/examples/textures/planets/neptune_bump_4k.jpg'
             );
             
             // Карликовые планеты
             createDwarfPlanet(
-                'Плутон', 3, { x: 600, y: 0, z: 0 }, 0.008, 0.0008,
-                'https://threejs.org/examples/textures/planets/pluto_map.jpg'
+                'Плутон', 3, 1000, 0.008, 0.002,
+                'https://threejs.org/examples/textures/planets/pluto_4k.jpg',
+                'https://threejs.org/examples/textures/planets/pluto_bump_4k.jpg'
             );
             
             createDwarfPlanet(
-                'Церера', 2, { x: 200, y: 0, z: 0 }, 0.006, 0.0025,
-                'https://threejs.org/examples/textures/planets/ceres_map.jpg'
+                'Церера', 2.5, 280, 0.005, 0.009,
+                'https://threejs.org/examples/textures/planets/ceres_4k.jpg',
+                'https://threejs.org/examples/textures/planets/ceres_bump_4k.jpg'
             );
             
             createDwarfPlanet(
-                'Хаумеа', 2.5, { x: 650, y: 0, z: 50 }, 0.015, 0.0007,
-                'https://threejs.org/examples/textures/planets/haumea_map.jpg'
+                'Эрида', 3, 1100, 0.01, 0.0015,
+                'https://threejs.org/examples/textures/planets/eris_4k.jpg'
             );
             
             createDwarfPlanet(
-                'Макемаке', 2.3, { x: 580, y: 0, z: -80 }, 0.01, 0.0009,
-                'https://threejs.org/examples/textures/planets/makemake_map.jpg'
+                'Хаумеа', 2, 1050, 0.03, 0.0018,
+                'https://threejs.org/examples/textures/planets/haumea_4k.jpg'
             );
             
             createDwarfPlanet(
-                'Эрида', 3.2, { x: 700, y: 0, z: 0 }, 0.009, 0.0006,
-                'https://threejs.org/examples/textures/planets/eris_map.jpg'
+                'Макемаке', 2.2, 1070, 0.007, 0.0016,
+                'https://threejs.org/examples/textures/planets/makemake_4k.jpg'
+            );
+            
+            // Луны
+            createMoon(
+                'Луна', 2, 15, 0.005, 0.05, 
+                earth, 'https://threejs.org/examples/textures/planets/moon_4k.jpg',
+                'https://threejs.org/examples/textures/planets/moon_bump_4k.jpg'
+            );
+            
+            createMoon(
+                'Титан', 3, 25, 0.005, 0.04,
+                saturn, 'https://threejs.org/examples/textures/planets/titan_4k.jpg'
+            );
+            
+            createMoon(
+                'Европа', 2.5, 20, 0.005, 0.045,
+                jupiter, 'https://threejs.org/examples/textures/planets/europa_4k.jpg'
             );
             
             // Убираем загрузочный экран
-            document.getElementById('loading').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 1000);
+            
+            // Начальная позиция камеры
+            camera.position.set(0, 50, 300);
         }
 
         // Анимация
         function animate() {
             requestAnimationFrame(animate);
             
-            // Вращение солнца
+            // Плавное изменение скорости
+            moveSpeed.current += (moveSpeed.target - moveSpeed.current) * 0.1;
+            
+            // Перемещение камеры
+            if (controls.isLocked) {
+                const actualSpeed = moveSpeed.current * (moveDirection.up || moveDirection.down ? 0.5 : 1);
+                
+                if (moveDirection.forward) controls.moveForward(actualSpeed);
+                if (moveDirection.backward) controls.moveForward(-actualSpeed);
+                if (moveDirection.left) controls.moveRight(-actualSpeed);
+                if (moveDirection.right) controls.moveRight(actualSpeed);
+                if (moveDirection.up) controls.getObject().position.y += actualSpeed;
+                if (moveDirection.down) controls.getObject().position.y -= actualSpeed;
+                
+                // Обновление информации о позиции
+                const pos = controls.getObject().position;
+                document.getElementById('position').textContent = 
+                    `X: ${Math.round(pos.x)}, Y: ${Math.round(pos.y)}, Z: ${Math.round(pos.z)}`;
+            }
+            
+            // Вращение Солнца
             if (solarSystem.sun) {
                 solarSystem.sun.rotation.y += 0.001;
+                
+                // Анимация солнечных протуберанцев
+                const prominences = solarSystem.sun.children.find(child => child.material?.wireframe);
+                if (prominences) {
+                    prominences.rotation.y += 0.002;
+                }
             }
             
             // Анимация планет
             solarSystem.planets.forEach(planet => {
-                // Вращение вокруг своей оси
                 planet.rotation.y += planet.userData.rotationSpeed;
                 
-                // Орбитальное движение
                 const time = Date.now() * 0.001;
                 const angle = time * planet.userData.orbitSpeed;
-                planet.position.x = Math.cos(angle) * planet.userData.orbitRadius;
-                planet.position.z = Math.sin(angle) * planet.userData.orbitRadius;
+                planet.position.x = Math.cos(angle) * planet.userData.distance;
+                planet.position.z = Math.sin(angle) * planet.userData.distance;
             });
             
             // Анимация карликовых планет
@@ -389,22 +699,36 @@
                 
                 const time = Date.now() * 0.001;
                 const angle = time * planet.userData.orbitSpeed;
-                planet.position.x = Math.cos(angle) * planet.userData.orbitRadius;
-                planet.position.z = Math.sin(angle) * planet.userData.orbitRadius;
+                planet.position.x = Math.cos(angle) * planet.userData.distance;
+                planet.position.z = Math.sin(angle) * planet.userData.distance;
+            });
+            
+            // Анимация лун
+            solarSystem.moons.forEach(moon => {
+                moon.rotation.y += moon.userData.rotationSpeed;
+                
+                const parent = moon.userData.parentPlanet;
+                if (parent) {
+                    const time = Date.now() * 0.001;
+                    const angle = time * moon.userData.orbitSpeed;
+                    moon.position.x = parent.position.x + Math.cos(angle) * moon.userData.distance;
+                    moon.position.z = parent.position.z + Math.sin(angle) * moon.userData.distance;
+                    moon.position.y = parent.position.y;
+                }
             });
             
             // Анимация астероидов
-            solarSystem.asteroids.forEach(asteroid => {
-                asteroid.rotation.x += asteroid.userData.rotationSpeed;
-                asteroid.rotation.y += asteroid.userData.rotationSpeed * 0.5;
-                
-                const angle = Date.now() * 0.001 * asteroid.userData.orbitSpeed;
-                const radius = Math.sqrt(asteroid.position.x * asteroid.position.x + asteroid.position.z * asteroid.position.z);
-                asteroid.position.x = Math.cos(angle) * radius;
-                asteroid.position.z = Math.sin(angle) * radius;
+            solarSystem.asteroidBelts.forEach(belt => {
+                belt.asteroids.forEach(asteroid => {
+                    asteroid.rotation.x += asteroid.userData.rotationSpeed;
+                    asteroid.rotation.y += asteroid.userData.rotationSpeed * 0.5;
+                    
+                    const angle = Date.now() * 0.001 * asteroid.userData.orbitSpeed;
+                    asteroid.position.x = Math.cos(angle) * asteroid.userData.radius;
+                    asteroid.position.z = Math.sin(angle) * asteroid.userData.radius;
+                });
             });
             
-            controls.update();
             renderer.render(scene, camera);
         }
 
@@ -415,7 +739,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Запуск инициализации после загрузки текстур
+        // Запуск
         init();
         animate();
     </script>
